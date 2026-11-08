@@ -18,6 +18,8 @@ Este guia acompanha o Nextel Local versão **1.4**. Ele ensina a instalar, conec
 
 O terminal mostra um endereço, como `http://192.168.0.10:8080`. Você vai usar esse endereço somente para abrir a página de cadastro ou baixar o instalador. **Não precisa informar o IP no aplicativo.**
 
+O site tem três páginas no menu: **Início**, **Criar acesso** e **APK**. Use **Criar acesso** para fazer sua conta e **APK** para baixar o instalador.
+
 O servidor usa TCP 8080 para a página, TCP 5000 para chamadas e UDP 5001 para localizar automaticamente o servidor. Se o firewall solicitar acesso em rede privada, permita.
 
 ## 2. Criar seu ID e senha

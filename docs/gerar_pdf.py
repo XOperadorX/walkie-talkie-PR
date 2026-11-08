@@ -68,6 +68,7 @@ pages = [
         ("step", "4. Deixe a janela do servidor aberta."),
         ("note", "O IP mostrado no terminal serve para abrir a página de cadastro. Você não precisa digitar IP no aplicativo."),
         ("body", "O servidor usa TCP 8080 para a página, TCP 5000 para as chamadas e UDP 5001 para o app localizar o servidor automaticamente."),
+        ("body", "O menu do site tem Início, Criar acesso e APK. Use Criar acesso para fazer sua conta e APK para baixar o instalador."),
         ("heading", "2. Criar seu acesso"),
         ("step", "1. Em um navegador no mesmo Wi-Fi, abra o endereço impresso no terminal (exemplo: http://192.168.0.10:8080)."),
         ("step", "2. Informe seu nome e crie uma senha com pelo menos 8 caracteres. Toque em Cadastrar."),
