@@ -1,14 +1,235 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" android:fillViewport="true" android:background="#EDF3F8">
-    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center_horizontal" android:padding="24dp">
-        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="📡 Nextel Local" android:textColor="#102A43" android:textSize="27sp" android:textStyle="bold" android:layout_marginTop="22dp" android:layout_marginBottom="8dp" />
-        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Rádio em grupo pela rede Wi-Fi local." android:textColor="#52687B" android:gravity="center" android:layout_marginBottom="26dp" />
-        <EditText android:id="@+id/etIp" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="IP do servidor (ex.: 192.168.0.10)" android:inputType="text" android:singleLine="true" android:autofillHints="none" android:padding="14dp" android:backgroundTint="#9AABBA" />
-        <EditText android:id="@+id/etId" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="ID recebido no cadastro" android:inputType="text" android:singleLine="true" android:layout_marginTop="10dp" android:padding="14dp" android:backgroundTint="#9AABBA" />
-        <EditText android:id="@+id/etSenha" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Sua senha" android:inputType="textPassword" android:singleLine="true" android:layout_marginTop="10dp" android:padding="14dp" android:backgroundTint="#9AABBA" />
-        <Button android:id="@+id/btnConectar" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Conectar" android:textAllCaps="false" android:layout_marginTop="18dp" />
-        <TextView android:id="@+id/tvStatus" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Desconectado" android:textColor="#52687B" android:gravity="center" android:padding="16dp" />
-        <Button android:id="@+id/btnFalar" android:layout_width="match_parent" android:layout_height="72dp" android:text="Toque e segure para falar" android:textAllCaps="false" android:textSize="18sp" android:enabled="false" android:layout_marginTop="12dp" />
-        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="FleetCall local: todos os aparelhos conectados à sala geral ouvem a transmissão. Solte o botão para encerrar." android:textColor="#52687B" android:gravity="center" android:padding="14dp" />
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="#EDF3F8">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:padding="22dp">
+
+        <LinearLayout
+            android:id="@+id/telaLogin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="📡 Nextel Local"
+                android:textColor="#102A43"
+                android:textSize="27sp"
+                android:textStyle="bold"
+                android:layout_marginTop="18dp"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Entre com seu ID e senha para ver quem está disponível no seu Wi-Fi."
+                android:textColor="#52687B"
+                android:gravity="center"
+                android:layout_marginBottom="14dp" />
+
+            <TextView
+                android:id="@+id/tvWifiLogin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Wi-Fi conectado: verificando..."
+                android:textColor="#087E8B"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:padding="12dp" />
+
+            <EditText
+                android:id="@+id/etId"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Seu ID"
+                android:inputType="text"
+                android:singleLine="true"
+                android:autofillHints="username"
+                android:padding="14dp"
+                android:backgroundTint="#9AABBA" />
+
+            <EditText
+                android:id="@+id/etSenha"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Sua senha"
+                android:inputType="textPassword"
+                android:singleLine="true"
+                android:autofillHints="password"
+                android:layout_marginTop="10dp"
+                android:padding="14dp"
+                android:backgroundTint="#9AABBA" />
+
+            <Button
+                android:id="@+id/btnConectar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Entrar"
+                android:textAllCaps="false"
+                android:layout_marginTop="16dp" />
+
+            <TextView
+                android:id="@+id/tvStatusLogin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Desconectado"
+                android:textColor="#52687B"
+                android:gravity="center"
+                android:padding="12dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="O nome da rede Wi-Fi é exibido quando o Android permite a leitura das informações da rede."
+                android:textColor="#718394"
+                android:textSize="12sp"
+                android:gravity="center"
+                android:padding="8dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/telaPrincipal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Pessoas disponíveis nesta rede"
+                android:textColor="#102A43"
+                android:textSize="22sp"
+                android:textStyle="bold"
+                android:layout_marginTop="12dp"
+                android:gravity="center" />
+
+            <TextView
+                android:id="@+id/tvWifiPrincipal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Wi-Fi conectado"
+                android:textColor="#087E8B"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:padding="10dp" />
+
+            <TextView
+                android:id="@+id/tvStatusPrincipal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Conectado"
+                android:textColor="#52687B"
+                android:gravity="center"
+                android:padding="8dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Favoritos"
+                android:textColor="#102A43"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="4dp" />
+
+            <LinearLayout
+                android:id="@+id/layoutFavoritos"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Todas as pessoas online"
+                android:textColor="#102A43"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginTop="14dp"
+                android:layout_marginBottom="4dp" />
+
+            <LinearLayout
+                android:id="@+id/layoutUsuarios"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <TextView
+                android:id="@+id/tvChamada"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Nenhuma chamada"
+                android:textColor="#52687B"
+                android:gravity="center"
+                android:padding="12dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center">
+                <Button
+                    android:id="@+id/btnAceitar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Aceitar"
+                    android:textAllCaps="false"
+                    android:visibility="gone" />
+                <Button
+                    android:id="@+id/btnRecusar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Recusar"
+                    android:textAllCaps="false"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnEncerrar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Encerrar chamada"
+                android:textAllCaps="false"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/btnFalar"
+                android:layout_width="match_parent"
+                android:layout_height="76dp"
+                android:text="Toque e segure para falar"
+                android:textAllCaps="false"
+                android:textSize="18sp"
+                android:enabled="false"
+                android:layout_marginTop="14dp" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Você só transmite áudio depois que a outra pessoa aceita a chamada."
+                android:textColor="#52687B"
+                android:gravity="center"
+                android:padding="10dp" />
+
+            <Button
+                android:id="@+id/btnDesconectar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Desconectar e voltar"
+                android:textAllCaps="false"
+                android:layout_marginTop="12dp" />
+        </LinearLayout>
     </LinearLayout>
 </ScrollView>

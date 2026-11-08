@@ -1,127 +1,154 @@
-"""Build the beginner user guide PDF using only Python's standard library."""
+"""Generate the current beginner guide PDF using only Python's standard library."""
 from pathlib import Path
 import textwrap
 
-PROJECT = Path(__file__).resolve().parents[1]
-DESTS = [PROJECT / 'docs' / 'guia_do_usuario.pdf', PROJECT / 'output' / 'pdf' / 'Nextel_Local_Guia_do_Usuario.pdf']
-W, H = 595, 842
-
-def hextext(s):
-    return s.encode('cp1252', errors='replace').hex().upper().encode('ascii')
-
-def page(items, number):
-    ops = [b'q', b'0.93 0.96 0.98 rg', b'0 0 595 842 re f', b'Q']
-    for item in items:
-        kind = item[0]
-        if kind == 'box':
-            _, x, y, w, h, color = item
-            ops += [f'{color} rg'.encode(), f'{x} {y} {w} {h} re f'.encode()]
-        elif kind == 'text':
-            _, x, y, size, color, font, value = item
-            ops += [f'BT /{font} {size} Tf {color} rg 1 0 0 1 {x} {y} Tm <'.encode() + hextext(value) + b'> Tj ET']
-    rodape = 'Nextel Local | Guia do usuario | versao 1.1'.encode('cp1252').hex().upper().encode('ascii')
-    ops += [b'0.38 0.49 0.59 RG 0.5 w 52 42 m 543 42 l S', b'BT /F1 8 Tf 0.38 0.49 0.59 rg 1 0 0 1 52 27 Tm <' + rodape + b'> Tj ET']
-    ops += [f'BT /F1 8 Tf 0.38 0.49 0.59 rg 1 0 0 1 535 27 Tm <{number:02d}> Tj ET'.encode()]
-    return b'\n'.join(ops)
-
-def add_text(items, value, y, size=10.5, color='0.14 0.24 0.33', bold=False, width=86, leading=None):
-    leading = leading or int(size * 1.45)
-    for line in textwrap.wrap(value, width=width, break_long_words=False, break_on_hyphens=False) or ['']:
-        items.append(('text', 56, y, size, color, 'F2' if bold else 'F1', line))
-        y -= leading
-    return y
-
-def heading(items, value, y):
-    y -= 8
-    items.append(('text', 54, y, 16, '0.03 0.49 0.54', 'F2', value))
-    return y - 22
-
-def numbered(items, values, y):
-    for i, value in enumerate(values, 1):
-        lines = textwrap.wrap(value, width=78, break_long_words=False, break_on_hyphens=False)
-        items.append(('text', 57, y, 10, '0.03 0.49 0.54', 'F2', f'{i}.'))
-        for line in lines:
-            items.append(('text', 77, y, 10, '0.14 0.24 0.33', 'F1', line))
-            y -= 14
-        y -= 3
-    return y
-
-pages = []
-p = [('box', 0, 600, W, 242, '0.06 0.16 0.26'),
-     ('text', 54, 755, 12, '0.54 0.84 0.83', 'F2', 'GUIA DO USUÁRIO'),
-     ('text', 54, 704, 30, '1 1 1', 'F2', 'Nextel Local')]
-add_text(p, 'Guia simples para instalar, conectar e conversar pelo celular.', 673, 12, '0.87 0.92 0.96', width=72, leading=18)
-p.append(('box', 54, 497, 487, 72, '0.87 0.96 0.95'))
-add_text(p, 'COMO FUNCIONA', 547, 10, '0.03 0.49 0.54', bold=True)
-add_text(p, 'Protótipo independente inspirado no Push-to-Talk: mantenha o botão pressionado para falar e solte para encerrar. O computador retransmite a voz aos celulares conectados ao mesmo Wi-Fi.', 527, 10, width=91)
-y = heading(p, 'Antes de começar', 470)
-y = add_text(p, 'Você precisa de um computador com Python 3.10 ou mais recente, um celular Android 8.0 ou mais recente e uma rede Wi-Fi privada.', y)
-y = heading(p, '1. Ligar o servidor', y)
-y = numbered(p, ['Abra a pasta do projeto no computador.', 'Abra o PowerShell dentro dessa pasta.', 'Digite python servidor/servidor_walkie.py e pressione Enter.', 'Se o Firewall perguntar, permita o Python em redes privadas.', 'Anote o endereço e o IP mostrados no terminal. Exemplo: http://192.168.0.10:8080.', 'Deixe a janela do PowerShell aberta durante o uso.'], y)
-p.append(('box', 54, max(75, y-4), 487, 39, '0.99 0.95 0.84'))
-add_text(p, 'A página usa a porta 8080. O áudio usa a porta 5000.', max(96, y+12), 9.5, '0.38 0.31 0.13', width=86)
-pages.append(page(p, 1))
-
-p = []
-y = heading(p, '2. Criar seu acesso', 784)
-y = numbered(p, ['No navegador, abra o endereço mostrado no terminal.', 'Informe seu nome e crie uma senha com pelo menos 8 caracteres.', 'Pressione Cadastrar.', 'Anote o ID exibido. O aplicativo pedirá esse ID e a senha.'], y)
-y = heading(p, '3. Gerar e instalar o aplicativo', y)
-y = add_text(p, 'O código do aplicativo está no projeto. O Android Studio gera o APK para instalar no celular.', y)
-y = numbered(p, ['Instale e abra o Android Studio no computador.', 'Abra nele a pasta android que fica dentro do projeto.', 'Espere a sincronização terminar.', 'No menu, selecione Build > Build Bundle(s) / APK(s) > Build APK(s).', 'Quando terminar, localize android/app/build/outputs/apk/debug/app-debug.apk.', 'Na página do servidor, toque em Baixar APK, ou transfira o arquivo ao celular.', 'Abra o APK. Se o Android solicitar, permita instalar aplicativos desta fonte e confirme Instalar.', 'Abra o aplicativo e permita o uso do microfone.'], y)
-p.append(('box', 54, max(74, y-2), 487, 42, '0.87 0.96 0.95'))
-add_text(p, 'O botão Baixar APK fica disponível depois que o APK for gerado no caminho indicado.', max(99, y+14), 9.5, width=88)
-pages.append(page(p, 2))
-
-p = []
-y = heading(p, '4. Entrar na sala e conversar', 784)
-y = numbered(p, ['Confirme que o servidor continua aberto e que o celular está no mesmo Wi-Fi.', 'No app, digite o IP do computador, apenas os números. Exemplo: 192.168.0.10. Não escreva http:// nem a porta 8080.', 'Digite seu ID e senha e toque em Conectar. Aguarde Conectado à sala geral.', 'Toque e mantenha pressionado Toque e segure para falar enquanto fala.', 'Solte o botão para terminar. Todos os aparelhos conectados à sala recebem a voz.', 'Toque em Desconectar quando terminar.'], y)
-y = heading(p, 'Se não conectar', y)
-for label, msg in [('Mesmo Wi-Fi', 'Confira se todos estão na mesma rede. Redes de convidados podem bloquear a comunicação entre aparelhos.'), ('IP', 'Use o IP atual do terminal. Ele pode mudar após reiniciar o roteador.'), ('Firewall', 'Permita o Python em redes privadas. A página usa TCP 8080 e o áudio TCP 5000.'), ('Microfone', 'Nas configurações do Android, abra Aplicativos, Nextel Local, Permissões e habilite Microfone.'), ('APK', 'Se a pagina disser que o APK não existe, gere-o no Android Studio conforme a seção 3.')]:
-    p.append(('text', 55, y, 10, '0.03 0.49 0.54', 'F2', label + ':'))
-    y = add_text(p, msg, y-14, 9.2, width=92, leading=12) - 2
-y = heading(p, 'Cuidados', y)
-y = add_text(p, 'Use apenas numa rede confiável. O áudio e a senha não têm criptografia durante o transporte; não encaminhe as portas para a internet. Os cadastros ficam em usuarios.json. Há apenas uma sala geral.', y, 9.2, width=94, leading=12)
-pages.append(page(p, 3))
+ROOT = Path(__file__).resolve().parents[1]
+DESTINATIONS = [ROOT / "docs" / "guia_do_usuario.pdf", ROOT / "output" / "pdf" / "Nextel_Local_Guia_do_Usuario.pdf"]
+WIDTH, HEIGHT = 595, 842
+VERSION = "1.4"
 
 
-p = [('box', 0, 600, W, 242, '0.06 0.16 0.26'),
-     ('text', 54, 755, 12, '0.54 0.84 0.83', 'F2', 'ENTENDA O ESTILO NEXTEL')]
-add_text(p, 'O que significa “rádio” neste projeto?', 704, 22, '1 1 1', bold=True, width=52)
-y = 648
-y = add_text(p, 'Aqui, “rádio” é o jeito de conversar: pressione para falar, solte para parar. O áudio viaja pelo Wi-Fi local até o computador servidor e volta para os celulares conectados.', y, 12, width=81, leading=18)
-y = heading(p, 'FleetCall e chamada de grupo', y-8)
-y = add_text(p, 'FleetCall aparece como referência à origem da história da Nextel. Neste aplicativo, todos compartilham uma sala geral. Não há escolha de canal ou conversa privada; a sala não se conecta ao serviço FleetCall histórico.', y, 10.5, width=83)
-y = heading(p, 'Um pouco da história', y-8)
-y = add_text(p, 'A empresa começou em 1987 como FleetCall e passou a se chamar Nextel Communications em 1993. A Motorola desenvolveu a tecnologia iDEN (Integrated Digital Enhanced Network), lançada comercialmente pela Nextel nos EUA em 1996. SMR significa Specialized Mobile Radio. Nos anos 2000, o Direct Connect popularizou o Push-to-Talk. Nextel evoca next (próximo) e tel (telefone).', y, 10.5, width=83)
-p.append(('box', 54, max(75, y-8), 487, 60, '0.99 0.95 0.84'))
-add_text(p, 'Este protótipo NÃO usa SMR, iDEN ou rede celular. Não é produto oficial da Nextel ou Motorola. Funciona somente por Wi-Fi local com o computador ligado.', max(106, y+38), 9.2, '0.38 0.31 0.13', bold=True, width=86, leading=13)
-pages.append(page(p, 4))
+def encoded(text):
+    return text.encode("cp1252", errors="replace").hex().upper().encode("ascii")
 
-objects = []
-def obj(data):
-    objects.append(data)
-    return len(objects)
-catalog = obj(b'')
-tree = obj(b'')
-f1 = obj(b'<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>')
-f2 = obj(b'<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>')
-page_ids = []
-for stream in pages:
-    sid = obj(b'<< /Length ' + str(len(stream)).encode() + b' >>\nstream\n' + stream + b'\nendstream')
-    page_ids.append(obj(f'<< /Type /Page /Parent {tree} 0 R /MediaBox [0 0 {W} {H}] /Resources << /Font << /F1 {f1} 0 R /F2 {f2} 0 R >> >> /Contents {sid} 0 R >>'.encode()))
-objects[catalog-1] = f'<< /Type /Catalog /Pages {tree} 0 R >>'.encode()
-objects[tree-1] = f"<< /Type /Pages /Kids [{' '.join(f'{i} 0 R' for i in page_ids)}] /Count {len(page_ids)} >>".encode()
-pdf = bytearray(b'%PDF-1.4\n%\xe2\xe3\xcf\xd3\n')
-offsets = [0]
-for i, data in enumerate(objects, 1):
-    offsets.append(len(pdf))
-    pdf.extend(f'{i} 0 obj\n'.encode() + data + b'\nendobj\n')
-xref = len(pdf)
-pdf.extend(f'xref\n0 {len(offsets)}\n'.encode() + b'0000000000 65535 f \n')
-for offset in offsets[1:]:
-    pdf.extend(f'{offset:010d} 00000 n \n'.encode())
-pdf.extend(f'trailer\n<< /Size {len(offsets)} /Root {catalog} 0 R >>\nstartxref\n{xref}\n%%EOF\n'.encode())
-for destination in DESTS:
+
+def build_page(sections, page_number):
+    commands = [b"q", b"0.95 0.97 0.98 rg", b"0 0 595 842 re f", b"Q"]
+    y = 790
+
+    def line(text, size=10, bold=False, color="0.14 0.24 0.33", indent=52, leading=None):
+        nonlocal y
+        leading = leading or round(size * 1.45)
+        width = max(35, int((540 - indent) / (size * 0.51)))
+        wrapped = textwrap.wrap(text, width=width, break_long_words=True, break_on_hyphens=False) or [""]
+        for fragment in wrapped:
+            commands.append(b"BT /%s %d Tf %s rg 1 0 0 1 %d %d Tm <%s> Tj ET" % (
+                b"F2" if bold else b"F1", size, color.encode("ascii"), indent, y, encoded(fragment)))
+            y -= leading
+
+    for kind, value in sections:
+        if kind == "title":
+            commands += [b"0.06 0.16 0.26 rg", f"0 700 {WIDTH} 142 re f".encode()]
+            line(value, 24, True, "1 1 1", 52, 34)
+            y -= 8
+        elif kind == "heading":
+            y -= 6
+            line(value, 14, True, "0.03 0.49 0.54", 52, 20)
+            y -= 2
+        elif kind == "step":
+            line(value, 9.5, False, indent=65, leading=13)
+            y -= 2
+        elif kind == "note":
+            line(value, 9, True, "0.42 0.32 0.12", 60, 13)
+            y -= 3
+        else:
+            line(value, 9.5, False, indent=52, leading=14)
+            y -= 3
+
+    commands += [b"0.38 0.49 0.59 RG 0.5 w 52 42 m 543 42 l S"]
+    footer = encoded(f"Nextel Local | Guia do usuario | versao {VERSION}")
+    commands += [b"BT /F1 8 Tf 0.38 0.49 0.59 rg 1 0 0 1 52 27 Tm <" + footer + b"> Tj ET"]
+    commands += [f"BT /F1 8 Tf 0.38 0.49 0.59 rg 1 0 0 1 530 27 Tm <{page_number:02d}> Tj ET".encode()]
+    return b"\n".join(commands)
+
+
+pages = [
+    [
+        ("title", "Nextel Local | Guia do celular"),
+        ("heading", "O que este aplicativo faz"),
+        ("body", "O app tem duas telas: a primeira pede ID e senha e mostra o nome do Wi-Fi; a segunda mostra favoritos e pessoas disponíveis. Uma pessoa chama, a outra ouve dois bipes e aceita. Depois, cada pessoa segura o botão para falar e solta para parar."),
+        ("heading", "Antes de começar"),
+        ("step", "1. Tenha um computador Windows com Python 3.10 ou mais novo."),
+        ("step", "2. Cada participante precisa de um celular Android 8.0 ou mais novo."),
+        ("step", "3. Conecte todos ao mesmo Wi-Fi. O computador e o servidor precisam permanecer ligados."),
+        ("heading", "1. Iniciar o servidor no computador"),
+        ("step", "1. Abra a pasta do projeto no computador."),
+        ("step", "2. Abra o PowerShell nessa pasta e execute: python servidor/servidor_walkie.py"),
+        ("step", "3. Se o Firewall do Windows perguntar, permita Python em redes privadas."),
+        ("step", "4. Deixe a janela do servidor aberta."),
+        ("note", "O IP mostrado no terminal serve para abrir a página de cadastro. Você não precisa digitar IP no aplicativo."),
+        ("body", "O servidor usa TCP 8080 para a página, TCP 5000 para as chamadas e UDP 5001 para o app localizar o servidor automaticamente."),
+        ("heading", "2. Criar seu acesso"),
+        ("step", "1. Em um navegador no mesmo Wi-Fi, abra o endereço impresso no terminal (exemplo: http://192.168.0.10:8080)."),
+        ("step", "2. Informe seu nome e crie uma senha com pelo menos 8 caracteres. Toque em Cadastrar."),
+        ("step", "3. Guarde o ID exibido e a senha. Cada pessoa cria seu proprio acesso."),
+    ],
+    [
+        ("heading", "3. Gerar o instalador Android pelo terminal"),
+        ("body", "O APK é o instalador do Android. É necessário JDK 17 e Android SDK API 35. Não é preciso abrir o Android Studio. Se o APK já existir, vá para a instalação."),
+        ("step", "1. Abra o PowerShell na pasta principal do projeto e configure Java e SDK:"),
+        ("body", '$env:JAVA_HOME = "C:\\Program Files\\Eclipse Adoptium\\jdk-17.0.20.101-hotspot"'),
+        ("body", '$env:PATH = "$env:JAVA_HOME\\bin;$env:PATH"'),
+        ("body", '$env:ANDROID_HOME = "$env:LOCALAPPDATA\\Android\\Sdk"'),
+        ("body", "$env:ANDROID_SDK_ROOT = $env:ANDROID_HOME"),
+        ("step", "2. Confira java -version (precisa mostrar 17) e Test-Path \"$env:ANDROID_HOME\\platforms\\android-35\" (precisa mostrar True). Se não tiver API 35, instale-a pelo sdkmanager e aceite as licenças."),
+        ("step", "3. Execute estes comandos para limpar e compilar:"),
+        ("body", ".\\gradlew.bat clean"),
+        ("body", "if ($LASTEXITCODE -eq 0) { .\\gradlew.bat assembleDebug }"),
+        ("step", "4. Aguarde BUILD SUCCESSFUL. Executar apenas .\\gradlew.bat mostra a ajuda e não gera o APK."),
+        ("step", "5. O instalador fica em android/app/build/outputs/apk/debug/app-debug.apk. Transfira-o ao celular e abra o arquivo."),
+        ("step", "6. Se solicitado, permita instalar apps desta fonte. Abra Nextel Local e permita o microfone."),
+        ("note", "Na primeira compilação, o Gradle baixa arquivos pela internet. Não precisa instalar Gradle separadamente."),
+        ("heading", "4. Entrar no aplicativo"),
+        ("step", "1. Na primeira tela, digite ID e senha. Depois do login bem-sucedido, o app guarda as credenciais criptografadas no celular."),
+        ("step", "2. O Android pode pedir permissão de localização para revelar o nome do Wi-Fi. O app usa essa permissão somente para ler o nome da rede. Se negar, a conexão automática continua disponível, mas o nome pode ficar indisponível."),
+        ("step", "3. Toque em Entrar. O app procura o servidor automaticamente, sem pedir IP. Depois do login, abre a segunda tela com os contatos."),
+    ],
+    [
+        ("heading", "5. Chamar e conversar"),
+        ("step", "1. Na lista de pessoas online, toque na estrela para guardar ou remover um ID dos favoritos. Os favoritos ficam salvos no celular, inclusive quando estão offline."),
+        ("step", "2. Toque em Chamar ao lado da pessoa desejada."),
+        ("step", "3. O celular da outra pessoa toca dois bipes. Ela toca em Aceitar para iniciar a chamada."),
+        ("step", "4. Depois do aceite, segure Toque e segure para falar. Solte o botão para parar."),
+        ("step", "5. Toque em Encerrar chamada quando terminar. Somente as duas pessoas da chamada ouvem o áudio."),
+        ("note", "Para receber convites, a outra pessoa deve manter o aplicativo aberto e conectado. Este protótipo não mostra notificações quando fechado."),
+        ("heading", "Se algo nao funcionar"),
+        ("body", "Servidor não encontrado: confirme mesmo Wi-Fi, servidor aberto e permissão do Firewall para Python em rede privada. O roteador deve permitir comunicação entre aparelhos; Wi-Fi de convidados pode bloquear."),
+        ("body", "Pessoa não aparece: ela precisa conectar o app ao mesmo servidor e Wi-Fi."),
+        ("body", "Botão de falar cinza: aguarde a outra pessoa aceitar a chamada. O botão só ativa depois do aceite."),
+        ("body", "Não consegue falar: habilite Microfone em Configurações > Aplicativos > Nextel Local > Permissões e tente novamente."),
+        ("body", "ID e senha não preencheram: digite-os novamente. O salvamento automático só ocorre depois de login bem-sucedido. Apagar os dados do app ou reinstalar remove as credenciais salvas."),
+        ("heading", "Privacidade e limites"),
+        ("body", "As credenciais guardadas no celular são criptografadas. Os favoritos guardam os IDs no aparelho. O servidor armazena hashes de senha em usuarios.json. A senha e o áudio não são criptografados durante o envio pela rede: use Wi-Fi privado e confiável, e não exponha as portas à internet."),
+        ("body", "O computador servidor é necessário. A descoberta funciona somente no mesmo Wi-Fi acessível ao computador; não funciona entre redes diferentes nem pela rede móvel."),
+        ("heading", "Sobre o nome Nextel"),
+        ("body", "O projeto é independente, sem vínculo oficial com Nextel ou Motorola. Não usa rádio SMR, tecnologia iDEN ou rede celular. FleetCall, PTT e a história da Nextel são referências de inspiração; esta versão faz chamadas privadas pela rede Wi-Fi local."),
+    ],
+]
+
+
+def make_pdf(page_streams):
+    objects = [b""]
+
+    def add(data):
+        objects.append(data)
+        return len(objects) - 1
+
+    catalog = add(b"")
+    tree = add(b"")
+    regular = add(b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>")
+    bold = add(b"<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>")
+    page_ids = []
+    for stream in page_streams:
+        stream_id = add(b"<< /Length " + str(len(stream)).encode() + b" >>\nstream\n" + stream + b"\nendstream")
+        page_ids.append(add(f"<< /Type /Page /Parent {tree} 0 R /MediaBox [0 0 {WIDTH} {HEIGHT}] /Resources << /Font << /F1 {regular} 0 R /F2 {bold} 0 R >> >> /Contents {stream_id} 0 R >>".encode()))
+    objects[catalog] = f"<< /Type /Catalog /Pages {tree} 0 R >>".encode()
+    objects[tree] = f"<< /Type /Pages /Kids [{' '.join(f'{page_id} 0 R' for page_id in page_ids)}] /Count {len(page_ids)} >>".encode()
+    pdf = bytearray(b"%PDF-1.4\n%\xe2\xe3\xcf\xd3\n")
+    offsets = [0]
+    for number, data in enumerate(objects[1:], 1):
+        offsets.append(len(pdf))
+        pdf.extend(f"{number} 0 obj\n".encode() + data + b"\nendobj\n")
+    xref = len(pdf)
+    pdf.extend(f"xref\n0 {len(offsets)}\n".encode() + b"0000000000 65535 f \n")
+    for offset in offsets[1:]:
+        pdf.extend(f"{offset:010d} 00000 n \n".encode())
+    pdf.extend(f"trailer\n<< /Size {len(offsets)} /Root {catalog} 0 R >>\nstartxref\n{xref}\n%%EOF\n".encode())
+    return pdf
+
+
+for destination in DESTINATIONS:
     destination.parent.mkdir(parents=True, exist_ok=True)
-    destination.write_bytes(pdf)
-    print(f'Gerado: {destination.resolve()} ({len(pdf)} bytes, {len(pages)} paginas)')
+    contents = make_pdf([build_page(sections, index) for index, sections in enumerate(pages, 1)])
+    destination.write_bytes(contents)
+    print(f"Gerado: {destination} ({len(contents)} bytes, {len(pages)} paginas)")

@@ -1,17 +1,34 @@
 <!doctype html>
 <html lang="pt-br">
 <head>
-  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#102a43"><title>Nextel Local - Rádio em grupo</title>
-  <style>
-    *{box-sizing:border-box}body{margin:0;background:#edf3f8;color:#18324a;font:16px system-ui,Arial,sans-serif}.wrap{width:min(720px,100%);margin:auto;padding:32px 18px}.hero{background:#102a43;color:#fff;padding:28px;border-radius:20px}.hero h1{margin:0 0 8px}.card{background:#fff;padding:24px;margin-top:18px;border-radius:16px;box-shadow:0 5px 18px #17324a12}label{display:block;font-weight:650;margin-top:14px}input{width:100%;padding:13px;margin-top:6px;border:1px solid #bdcbd8;border-radius:9px;font-size:16px}button,.button{display:inline-block;width:100%;border:0;border-radius:9px;padding:14px;margin-top:18px;background:#087e8b;color:#fff;font-size:16px;font-weight:700;text-align:center;text-decoration:none;cursor:pointer}.note{background:#fff4d6;padding:14px;border-radius:10px;line-height:1.55}.muted{color:#52687b;font-size:.94rem}code{background:#eaf0f5;padding:2px 5px;border-radius:4px}
-  </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#102a43">
+  <title>Nextel Local · Início</title>
+  <style>*{box-sizing:border-box}body{margin:0;background:#edf3f8;color:#18324a;font:16px system-ui,Arial,sans-serif}.wrap{width:min(760px,100%);margin:auto;padding:24px 18px 48px}.hero{background:#102a43;color:#fff;padding:30px;border-radius:20px}.hero h1{margin:0 0 8px;font-size:30px}.hero p{margin:0;line-height:1.5}.menu{display:flex;gap:12px;margin:16px 0}.menu a,.button{display:inline-flex;align-items:center;justify-content:center;border-radius:10px;padding:12px 18px;background:#087e8b;color:white;font-weight:700;text-decoration:none}.menu a{flex:1}.card{background:#fff;padding:24px;margin-top:16px;border-radius:16px;box-shadow:0 5px 18px #17324a12}.card h2{margin-top:0}.instructions{padding-left:24px;line-height:1.65}.instructions li{padding-left:4px;margin:5px 0}.muted{color:#52687b;font-size:.94rem;line-height:1.55}label{display:block;font-weight:650;margin-top:14px}input{width:100%;padding:13px;margin-top:6px;border:1px solid #bdcbd8;border-radius:9px;font-size:16px}.button{width:100%;margin-top:16px;border:0;font-size:16px;cursor:pointer}@media(max-width:420px){.hero{padding:23px}.card{padding:19px}.menu{gap:8px}.menu a{padding:11px 8px}}</style>
 </head>
-<body><main class="wrap">
-  <header class="hero"><h1>📡 Nextel Local</h1><p>Rádio em grupo: pressione para falar e solte para encerrar.</p></header>
-  <section class="card"><h2>Criar acesso</h2><p class="muted">O ID será criado após o cadastro. Use uma senha com pelo menos 8 caracteres.</p>
-    <form method="post" action="/cadastrar"><label for="nome">Seu nome</label><input id="nome" name="nome" minlength="2" maxlength="50" required autocomplete="name"><label for="senha">Crie uma senha</label><input id="senha" name="senha" type="password" minlength="8" maxlength="128" required autocomplete="new-password"><button type="submit">Cadastrar</button></form>
-  </section>
-  <section class="card"><h2>Aplicativo Android · versão 1.1</h2><a class="button" href="/download">Baixar APK</a><p class="muted">O botão ficará disponível quando o APK de depuração for compilado e salvo na pasta do projeto.</p></section>
-  <section class="card"><h2>O que você precisa</h2><div class="note">1. Deixe o computador e os celulares conectados ao mesmo roteador Wi-Fi.<br>2. Abra esta página no computador e faça o cadastro.<br>3. No app, informe o IP exibido no terminal do servidor, seu ID e sua senha.<br>4. Permita o uso do microfone. Toque e segure <strong>para falar</strong>; solte para terminar. Todos na sala geral ouvem.</div><p class="muted">O servidor e os aparelhos precisam continuar ligados. A comunicação de áudio funciona na rede local; não é necessário internet externa. Este protótipo não acessa rádio SMR nem a rede iDEN da Nextel.</p></section>
-</main></body></html>
+<body>
+  <main class="wrap">
+    <header class="hero">
+      <h1>📡 Nextel Local</h1>
+      <p>Chamadas privadas por Wi-Fi: chame, aguarde o aceite e segure para falar.</p>
+    </header>
+    <nav class="menu" aria-label="Menu principal">
+      <a href="inicio.html" aria-current="page">Início</a>
+      <a href="cadastro.html">Criar acesso</a>
+      <a href="apk.html">APK</a>
+    </nav>
+    <section class="card">
+      <h2>O que você precisa</h2>
+      <ol class="instructions">
+        <li>Mantenha o computador servidor e os celulares no mesmo Wi-Fi.</li>
+        <li>No menu, toque em Criar acesso e crie seu ID e sua senha.</li>
+        <li>No app, entre com ID e senha. O servidor será encontrado automaticamente, sem digitar IP.</li>
+        <li>Escolha uma pessoa e toque em <strong>Chamar</strong>. Ela ouvirá dois bipes e precisará aceitar.</li>
+        <li>Após o aceite, segure o botão para falar e solte para parar. Só os participantes da chamada ouvem.</li>
+      </ol>
+      <p class="muted">Deixe o aplicativo aberto para receber convites. O servidor e os aparelhos precisam continuar ligados. Este protótipo usa Wi-Fi local; não acessa rádio SMR, iDEN ou rede de operadora.</p>
+    </section>
+  </main>
+</body>
+</html>
