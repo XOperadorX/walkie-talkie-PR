@@ -120,7 +120,7 @@ class MainActivity : android.app.Activity() {
                 if (recorder.state != AudioRecord.STATE_INITIALIZED) error("Não foi possível iniciar o microfone.")
                 gravador = recorder
                 recorder.startRecording()
-                status("Falando... solte o botão para terminar")
+                status("Transmitindo... solte para encerrar")
                 val buffer = ByteArray(4096)
                 val output = socket?.getOutputStream() ?: error("Sem conexão com o servidor.")
                 while (falando.get() && conectado.get()) {
