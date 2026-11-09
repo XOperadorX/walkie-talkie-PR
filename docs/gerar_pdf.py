@@ -5,7 +5,7 @@ import textwrap
 ROOT = Path(__file__).resolve().parents[1]
 DESTINATIONS = [ROOT / "docs" / "guia_do_usuario.pdf", ROOT / "output" / "pdf" / "Nextel_Local_Guia_do_Usuario.pdf"]
 WIDTH, HEIGHT = 595, 842
-VERSION = "1.4"
+VERSION = "1.7"
 
 
 def encoded(text):
@@ -73,6 +73,7 @@ pages = [
         ("step", "1. Em um navegador no mesmo Wi-Fi, abra o endereço impresso no terminal (exemplo: http://192.168.0.10:8080)."),
         ("step", "2. Informe seu nome e crie uma senha com pelo menos 8 caracteres. Toque em Cadastrar."),
         ("step", "3. Guarde o ID exibido e a senha. Cada pessoa cria seu proprio acesso."),
+        ("note", "Cada pessoa use seu ID. Entrar com o mesmo ID em outro celular substitui a sessão anterior."),
     ],
     [
         ("heading", "3. Gerar o instalador Android pelo terminal"),
@@ -91,7 +92,7 @@ pages = [
         ("step", "6. Se solicitado, permita instalar apps desta fonte. Abra Nextel Local e permita o microfone."),
         ("note", "Na primeira compilação, o Gradle baixa arquivos pela internet. Não precisa instalar Gradle separadamente."),
         ("heading", "4. Entrar no aplicativo"),
-        ("step", "1. Na primeira tela, digite ID e senha. Depois do login bem-sucedido, o app guarda as credenciais criptografadas no celular."),
+        ("step", "1. A primeira tela mostra a versão do app e o nome do Wi-Fi. Digite ID e senha. Depois do login, o app guarda as credenciais criptografadas no celular."),
         ("step", "2. O Android pode pedir permissão de localização para revelar o nome do Wi-Fi. O app usa essa permissão somente para ler o nome da rede. Se negar, a conexão automática continua disponível, mas o nome pode ficar indisponível."),
         ("step", "3. Toque em Entrar. O app procura o servidor automaticamente, sem pedir IP. Depois do login, abre a segunda tela com os contatos."),
     ],
@@ -99,12 +100,13 @@ pages = [
         ("heading", "5. Chamar e conversar"),
         ("step", "1. Na lista de pessoas online, toque na estrela para guardar ou remover um ID dos favoritos. Os favoritos ficam salvos no celular, inclusive quando estão offline."),
         ("step", "2. Toque em Chamar ao lado da pessoa desejada."),
-        ("step", "3. O celular da outra pessoa toca dois bipes. Ela toca em Aceitar para iniciar a chamada."),
+        ("step", "3. Os dois celulares tocam dois bipes. A pessoa chamada toca em Aceitar para iniciar a chamada."),
         ("step", "4. Depois do aceite, segure Toque e segure para falar. Solte o botão para parar."),
         ("step", "5. Toque em Encerrar chamada quando terminar. Somente as duas pessoas da chamada ouvem o áudio."),
         ("note", "Para receber convites, a outra pessoa deve manter o aplicativo aberto e conectado. Este protótipo não mostra notificações quando fechado."),
         ("heading", "Se algo nao funcionar"),
         ("body", "Servidor não encontrado: confirme mesmo Wi-Fi, servidor aberto e permissão do Firewall para Python em rede privada. O roteador deve permitir comunicação entre aparelhos; Wi-Fi de convidados pode bloquear."),
+        ("body", "Conexão interrompida ao chamar: entre novamente e tente chamar alguém conectado. O terminal informa se o convite foi enviado ou se a pessoa estava offline/ocupada."),
         ("body", "Pessoa não aparece: ela precisa conectar o app ao mesmo servidor e Wi-Fi."),
         ("body", "Botão de falar cinza: aguarde a outra pessoa aceitar a chamada. O botão só ativa depois do aceite."),
         ("body", "Não consegue falar: habilite Microfone em Configurações > Aplicativos > Nextel Local > Permissões e tente novamente."),

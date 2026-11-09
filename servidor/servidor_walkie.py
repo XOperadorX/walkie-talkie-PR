@@ -166,6 +166,24 @@ def encerrar_chamada(chamada_id: str, motivo: str) -> None:
                         pass
 
 
+def remover_cliente(sock: socket.socket) -> None:
+    """Drop a peer whose socket failed without dropping another caller."""
+    with lock:
+        chamada_id = chamada_por_cliente.get(sock)
+        clientes.pop(sock, None)
+    if chamada_id:
+        encerrar_chamada(chamada_id, "conexao_perdida")
+    try:
+        sock.shutdown(socket.SHUT_RDWR)
+    except OSError:
+        pass
+    try:
+        sock.close()
+    except OSError:
+        pass
+    atualizar_usuarios_online()
+
+
 def processar_controle(sock: socket.socket, mensagem: dict) -> None:
     comando = mensagem.get("tipo")
     if comando == "chamar":
@@ -194,14 +212,23 @@ def processar_controle(sock: socket.socket, mensagem: dict) -> None:
             chamada_por_cliente[sock] = chamada_id
             chamada_por_cliente[destino] = chamada_id
             temporizador.start()
-            enviar_controle(destino, {
-                "tipo": "convite", "chamada_id": chamada_id,
-                "origem_id": origem_info["id"], "origem_nome": origem_info["nome"],
-            })
-            enviar_controle(sock, {
-                "tipo": "chamada_enviada", "chamada_id": chamada_id,
-                "destino_nome": destino_info["nome"],
-            })
+            try:
+                enviar_controle(destino, {
+                    "tipo": "convite", "chamada_id": chamada_id,
+                    "origem_id": origem_info["id"], "origem_nome": origem_info["nome"],
+                })
+            except OSError:
+                print("[chamada] o aparelho chamado perdeu a conexão; removendo-o da lista")
+                remover_cliente(destino)
+                return
+            try:
+                enviar_controle(sock, {
+                    "tipo": "chamada_enviada", "chamada_id": chamada_id,
+                    "destino_nome": destino_info["nome"],
+                })
+            except OSError:
+                remover_cliente(sock)
+                return
             print("[chamada] convite enviado para uma pessoa online")
         return
 
@@ -215,10 +242,18 @@ def processar_controle(sock: socket.socket, mensagem: dict) -> None:
             chamadas_pendentes.pop(chamada_id, None)
             origem, destino = pendente["origem"], pendente["destino"]
             chamadas_ativas[chamada_id] = (origem, destino)
-            enviar_controle(origem, {"tipo": "chamada_aceita", "chamada_id": chamada_id,
-                                     "nome": clientes.get(destino, {}).get("nome", "Usuário")})
-            enviar_controle(destino, {"tipo": "chamada_aceita", "chamada_id": chamada_id,
-                                      "nome": clientes.get(origem, {}).get("nome", "Usuário")})
+            try:
+                enviar_controle(origem, {"tipo": "chamada_aceita", "chamada_id": chamada_id,
+                                         "nome": clientes.get(destino, {}).get("nome", "Usuário")})
+            except OSError:
+                remover_cliente(origem)
+                return
+            try:
+                enviar_controle(destino, {"tipo": "chamada_aceita", "chamada_id": chamada_id,
+                                          "nome": clientes.get(origem, {}).get("nome", "Usuário")})
+            except OSError:
+                remover_cliente(destino)
+                return
             print("[chamada] convite aceito; áudio privado liberado")
         elif comando in ("recusar", "cancelar", "encerrar"):
             participantes = chamadas_ativas.get(chamada_id)
@@ -256,6 +291,13 @@ class AudioHandler(socketserver.BaseRequestHandler):
                 nome = usuarios.get(uid, {}).get("nome", "Usuário")
             enviar_json(sock, {"status": "ok", "mensagem": "Autenticado."})
             with lock:
+                sessoes_anteriores = tuple(
+                    cliente for cliente, info in clientes.items() if info["id"] == uid
+                )
+            for sessao_antiga in sessoes_anteriores:
+                print("[login] substituindo uma sessão anterior do mesmo ID")
+                remover_cliente(sessao_antiga)
+            with lock:
                 clientes[sock] = {"id": uid, "nome": nome}
             atualizar_usuarios_online()
             while True:
@@ -282,7 +324,7 @@ class AudioHandler(socketserver.BaseRequestHandler):
                         try:
                             enviar_pacote(destino, b"A", audio)
                         except OSError:
-                            encerrar_chamada(chamada_id or "", "conexao_perdida")
+                            remover_cliente(destino)
                 else:
                     raise ConnectionError("Tipo de pacote inválido")
         except (OSError, ConnectionError, socket.timeout):

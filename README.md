@@ -1,6 +1,6 @@
 # Nextel Local
 
-Protótipo de comunicação por Wi-Fi com chamadas privadas e Push-to-Talk (PTT), inspirado na experiência de rádio da Nextel. O projeto reúne servidor Python, página de cadastro e aplicativo Android **versão 1.4** (`versionCode 5`).
+Protótipo de comunicação por Wi-Fi com chamadas privadas e Push-to-Talk (PTT), inspirado na experiência de rádio da Nextel. O projeto reúne servidor Python, página de cadastro e aplicativo Android **versão 1.7** (`versionCode 8`).
 
 > **Sobre o projeto:** Nextel Local é independente e experimental. Não é produto oficial da Nextel ou Motorola e não usa rádio SMR, iDEN nem rede de operadora. O computador servidor precisa ficar ligado. O celular encontra o servidor automaticamente na rede Wi-Fi local; não é preciso digitar o IP no aplicativo.
 
@@ -8,9 +8,9 @@ Protótipo de comunicação por Wi-Fi com chamadas privadas e Push-to-Talk (PTT)
 
 1. Inicie o servidor no computador e mantenha-o aberto.
 2. Conecte os celulares ao mesmo Wi-Fi do computador.
-3. Cada pessoa cria uma conta na página do servidor. A **tela 1** do app pede ID e senha e mostra o nome do Wi-Fi. Depois de entrar, o aparelho guarda as credenciais criptografadas.
+3. Cada pessoa cria uma conta na página do servidor. A **tela 1** do app pede ID e senha e mostra o nome do Wi-Fi e a versão instalada. Depois de entrar, o aparelho guarda as credenciais criptografadas.
 4. O app abre a **tela 2**, com pessoas disponíveis e favoritos. Toque na estrela para guardar ou remover um ID; os favoritos ficam salvos no celular.
-5. Toque em **Chamar** ao lado da pessoa. O celular dela toca dois bipes; ela precisa aceitar.
+5. Toque em **Chamar** ao lado da pessoa. Os dois celulares tocam dois bipes; a pessoa chamada precisa aceitar.
 6. Depois que aceitar, segure **Toque e segure para falar** enquanto fala e solte para parar. Só as duas pessoas da chamada recebem o áudio.
 7. Toque em **Encerrar chamada** ao terminar ou em **Desconectar e voltar** para retornar à entrada.
 
@@ -88,6 +88,8 @@ O script atualiza `docs/guia_do_usuario.pdf` e `output/pdf/Nextel_Local_Guia_do_
 - O tráfego de senha e áudio não usa criptografia de transporte. Use uma rede confiável e não exponha as portas à internet.
 - O servidor encaminha áudio apenas entre participantes de uma chamada aceita; não há sala geral, histórico ou notificações quando o app está fechado.
 - Os favoritos guardam somente IDs no aparelho e continuam visíveis mesmo quando esses contatos estão offline.
+- Cada pessoa deve usar seu próprio ID; entrar com o mesmo ID em outro celular substitui a sessão anterior.
+- Se a conexão cair ao chamar, entre novamente. O terminal do servidor informa se o convite foi enviado ou se o contato estava offline/ocupado.
 - A descoberta automática funciona na mesma rede Wi-Fi acessível ao computador servidor. Não funciona através de redes diferentes ou da rede móvel.
 
 ## Referência histórica

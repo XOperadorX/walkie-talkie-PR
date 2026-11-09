@@ -1,6 +1,6 @@
 # Guia do Nextel Local para celular
 
-Este guia acompanha o Nextel Local versão **1.4**. Ele ensina a instalar, conectar e fazer uma chamada privada pelo celular. O aplicativo usa o Wi-Fi local e um computador servidor. Não é um rádio Nextel original e não se conecta às redes SMR, iDEN ou de operadora.
+Este guia acompanha o Nextel Local versão **1.7**. Ele ensina a instalar, conectar e fazer uma chamada privada pelo celular. O aplicativo usa o Wi-Fi local e um computador servidor. Não é um rádio Nextel original e não se conecta às redes SMR, iDEN ou de operadora.
 
 ## O que você precisa
 
@@ -28,6 +28,8 @@ O servidor usa TCP 8080 para a página, TCP 5000 para chamadas e UDP 5001 para l
 2. Digite seu nome e crie uma senha com pelo menos 8 caracteres.
 3. Toque em **Cadastrar**.
 4. Anote o ID que aparece na página e guarde-o com a senha. Cada participante precisa criar a própria conta.
+
+Use um ID diferente para cada pessoa. Se entrar com o mesmo ID em outro celular, a nova conexão substitui a anterior.
 
 ## 3. Gerar e instalar o aplicativo pelo terminal
 
@@ -71,11 +73,11 @@ Na primeira compilação, o Gradle Wrapper baixa Gradle 8.9 pela internet. Não 
 ## 4. Conectar e fazer chamada
 
 1. Confirme que o servidor está ligado e que os celulares usam o mesmo Wi-Fi do computador.
-2. Abra o Nextel Local. A **tela 1** mostra o nome do Wi-Fi e os campos de ID e senha. Na primeira vez, digite seus dados. Depois de entrar com sucesso, o app salva ID e senha criptografados no celular.
+2. Abra o Nextel Local. A **tela 1** mostra o nome do Wi-Fi, a versão instalada e os campos de ID e senha. Na primeira vez, digite seus dados. Depois de entrar com sucesso, o app salva ID e senha criptografados no celular.
 3. O Android pode pedir permissão de localização para mostrar o nome do Wi-Fi. O aplicativo usa essa permissão somente para ler o nome da rede; não calcula nem registra a localização do aparelho. Se não permitir, ainda pode conectar, mas talvez o nome da rede não apareça.
 4. Toque em **Entrar**. O aplicativo procura o servidor automaticamente, sem pedir IP. Quando a conexão for aceita, abre a **tela 2**.
 5. A tela 2 mostra os favoritos e as pessoas online. Toque na estrela ao lado de um ID para adicioná-lo ou removê-lo dos favoritos. A lista de favoritos fica salva no celular, mesmo quando a pessoa está offline.
-6. Toque em **Chamar** ao lado da pessoa desejada. O celular dela toca dois bipes e mostra o pedido. Ela deve tocar em **Aceitar**. Mantenha o app dela aberto para receber o convite.
+6. Toque em **Chamar** ao lado da pessoa desejada. Os dois celulares tocam dois bipes. O celular chamado mostra o pedido; a outra pessoa deve tocar em **Aceitar**. Mantenha o app dela aberto para receber o convite.
 7. Depois que a chamada for aceita, qualquer um dos dois pode segurar **Toque e segure para falar**, falar e soltar o botão para parar.
 8. Toque em **Encerrar chamada** para terminar. A voz só é enviada entre as duas pessoas que aceitaram participar.
 9. Toque em **Desconectar e voltar** para encerrar a conexão e retornar à tela 1.
@@ -85,6 +87,7 @@ Esse modo de falar é chamado Push-to-Talk (PTT): pressione e segure para falar,
 ## Se algo não funcionar
 
 - **Servidor não encontrado:** confira se o computador e o celular estão no mesmo Wi-Fi, se o servidor continua aberto e se o firewall permite Python em rede privada.
+- **“Conexão com o servidor interrompida” ao chamar:** entre novamente no app e tente chamar outra pessoa que esteja conectada. O servidor remove da lista um celular que perdeu a conexão; confira no terminal se aparece “convite enviado” ou “offline ou ocupada”.
 - **Conecta à página, mas o app não encontra o servidor:** o roteador pode bloquear a comunicação entre aparelhos. Redes de convidados costumam ter esse bloqueio. O servidor precisa receber UDP 5001 e TCP 5000 em rede privada.
 - **Pessoa não aparece na lista:** ela precisa estar conectada no app ao mesmo servidor e Wi-Fi.
 - **Botão para falar continua cinza:** durante o convite, o app mostra “Aguarde o aceite para falar”. O botão só fica ativo depois que a outra pessoa aceita; isso evita transmitir áudio antes da chamada começar.

@@ -95,6 +95,16 @@
                 android:textSize="12sp"
                 android:gravity="center"
                 android:padding="8dp" />
+
+            <TextView
+                android:id="@+id/tvVersao"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Versão"
+                android:textColor="#718394"
+                android:textSize="12sp"
+                android:gravity="center"
+                android:padding="6dp" />
         </LinearLayout>
 
         <LinearLayout

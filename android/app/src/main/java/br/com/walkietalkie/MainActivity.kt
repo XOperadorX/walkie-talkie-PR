@@ -58,6 +58,7 @@ class MainActivity : android.app.Activity() {
         private const val TOKEN_DESCOBERTA = "NEXTEL_LOCAL_DISCOVER_V1"
         private const val PREFERENCIAS = "acesso_protegido"
         private const val ALIAS_CHAVE = "nextel_local_credenciais_v1"
+        private const val VERSAO_DESCONHECIDA = "Versão indisponível"
     }
 
     private lateinit var etId: EditText
@@ -74,11 +75,13 @@ class MainActivity : android.app.Activity() {
     private lateinit var tvStatusPrincipal: TextView
     private lateinit var tvWifiLogin: TextView
     private lateinit var tvWifiPrincipal: TextView
+    private lateinit var tvVersao: TextView
     private lateinit var tvChamada: TextView
     private lateinit var layoutFavoritos: LinearLayout
     private lateinit var layoutUsuarios: LinearLayout
 
     private val executor: ExecutorService = Executors.newCachedThreadPool()
+    private val executorControles: ExecutorService = Executors.newSingleThreadExecutor()
     private val mainHandler = Handler(Looper.getMainLooper())
     private val conectado = AtomicBoolean(false)
     private val falando = AtomicBoolean(false)
@@ -116,11 +119,13 @@ class MainActivity : android.app.Activity() {
         tvStatusPrincipal = findViewById(R.id.tvStatusPrincipal)
         tvWifiLogin = findViewById(R.id.tvWifiLogin)
         tvWifiPrincipal = findViewById(R.id.tvWifiPrincipal)
+        tvVersao = findViewById(R.id.tvVersao)
         tvChamada = findViewById(R.id.tvChamada)
         layoutFavoritos = findViewById(R.id.layoutFavoritos)
         layoutUsuarios = findViewById(R.id.layoutUsuarios)
 
         carregarCredenciais()
+        tvVersao.text = obterVersaoSistema()
         atualizarNomeWifiInterface()
         btnConectar.setOnClickListener { conectar() }
         btnDesconectar.setOnClickListener { desconectar("Desconectado") }
@@ -258,6 +263,16 @@ class MainActivity : android.app.Activity() {
         telaLogin.visibility = android.view.View.VISIBLE
     }
 
+    @Suppress("DEPRECATION")
+    private fun obterVersaoSistema(): String {
+        return try {
+            val versao = packageManager.getPackageInfo(packageName, 0).versionName
+            if (versao.isNullOrBlank()) VERSAO_DESCONHECIDA else "Versão $versao"
+        } catch (_: Exception) {
+            VERSAO_DESCONHECIDA
+        }
+    }
+
     private fun enderecosBroadcast(): List<InetAddress> {
         val enderecos = linkedSetOf<InetAddress>()
         try {
@@ -369,6 +384,7 @@ class MainActivity : android.app.Activity() {
                 destinoNome = mensagem.optString("destino_nome", "usuário")
                 recebendoConvite = false
                 chamadaPendente.set(true)
+                tocarBip()
                 runOnUiThread {
                     tvChamada.text = "Chamando ${destinoNome ?: "usuário"}... Aguarde a resposta."
                     btnFalar.isEnabled = false
@@ -641,12 +657,16 @@ class MainActivity : android.app.Activity() {
     }
 
     private fun enviarControle(mensagem: JSONObject) {
-        try {
-            enviarPacote('C', mensagem.toString().toByteArray(Charsets.UTF_8))
-        } catch (e: Exception) {
-            if (conectado.get()) {
-                aviso("A conexão com o servidor foi interrompida. Entre novamente para fazer a chamada.")
-                desconectar("Conexão com o servidor interrompida.", avisarServidor = false)
+        val pacote = mensagem.toString().toByteArray(Charsets.UTF_8)
+        executorControles.execute {
+            try {
+                enviarPacote('C', pacote)
+            } catch (e: Exception) {
+                if (conectado.get()) {
+                    val detalhe = e.message?.takeIf { it.isNotBlank() } ?: e.javaClass.simpleName
+                    aviso("Falha ao enviar o comando ($detalhe). Verifique a conexão com o servidor.")
+                    desconectar("Conexão com o servidor interrompida.")
+                }
             }
         }
     }
@@ -710,13 +730,8 @@ class MainActivity : android.app.Activity() {
         return String(cifra.doFinal(conteudo), Charsets.UTF_8)
     }
 
-    private fun desconectar(mensagem: String = "Desconectado", avisarServidor: Boolean = true) {
-        val estavaConectado = conectado.getAndSet(false)
-        if (avisarServidor && estavaConectado) {
-            chamadaId?.let { id ->
-                try { enviarPacote('C', JSONObject().put("tipo", "encerrar").put("chamada_id", id).toString().toByteArray(Charsets.UTF_8)) } catch (_: Exception) { }
-            }
-        }
+    private fun desconectar(mensagem: String = "Desconectado") {
+        conectado.set(false)
         chamadaPendente.set(false)
         chamadaAtiva.set(false)
         falando.set(false)
@@ -791,6 +806,7 @@ class MainActivity : android.app.Activity() {
         pararReproducao()
         try { socket?.close() } catch (_: Exception) { }
         executor.shutdownNow()
+        executorControles.shutdownNow()
         super.onDestroy()
     }
 }
