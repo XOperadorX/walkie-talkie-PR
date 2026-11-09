@@ -1,48 +1,93 @@
 # Nextel Local
 
-Protótipo de comunicação por Wi-Fi com chamadas privadas e Push-to-Talk (PTT), inspirado na experiência de rádio da Nextel. O projeto reúne servidor Python, página de cadastro e aplicativo Android **versão 1.7** (`versionCode 8`).
+Aplicativo experimental de comunicação por voz em uma rede Wi-Fi local. O projeto reúne um servidor Python, páginas Web para criar e administrar contas e um aplicativo Android com chamadas privadas e botão Push-to-Talk (PTT).
 
-> **Sobre o projeto:** Nextel Local é independente e experimental. Não é produto oficial da Nextel ou Motorola e não usa rádio SMR, iDEN nem rede de operadora. O computador servidor precisa ficar ligado. O celular encontra o servidor automaticamente na rede Wi-Fi local; não é preciso digitar o IP no aplicativo.
+O projeto não é um produto oficial da Nextel ou da Motorola e não usa rádio SMR, iDEN nem rede de operadora. O computador que executa o servidor precisa ficar ligado durante o uso.
 
-## Como conversar
+## O que está incluído
 
-1. Inicie o servidor no computador e mantenha-o aberto.
-2. Conecte os celulares ao mesmo Wi-Fi do computador.
-3. Cada pessoa cria uma conta na página do servidor. A **tela 1** do app pede ID e senha e mostra o nome do Wi-Fi e a versão instalada. Depois de entrar, o aparelho guarda as credenciais criptografadas.
-4. O app abre a **tela 2**, com pessoas disponíveis e favoritos. Toque na estrela para guardar ou remover um ID; os favoritos ficam salvos no celular.
-5. Toque em **Chamar** ao lado da pessoa. Os dois celulares tocam dois bipes; a pessoa chamada precisa aceitar.
-6. Depois que aceitar, segure **Toque e segure para falar** enquanto fala e solte para parar. Só as duas pessoas da chamada recebem o áudio.
-7. Toque em **Encerrar chamada** ao terminar ou em **Desconectar e voltar** para retornar à entrada.
+- `servidor/servidor_walkie.py`: autenticação, chamadas, descoberta na rede local, páginas Web e download do APK.
+- `web/index.html` e `web/inicio.html`: página inicial e instruções rápidas.
+- `web/cadastro.html`: criação de contas para os usuários do aplicativo.
+- `web/adm_cadastro.html`: tela para adicionar, editar nome ou senha e excluir contas.
+- `web/apk.html`: página para baixar o APK compilado.
+- `android/`: aplicativo Android.
+- `iniciar_servidor.bat`: atalho para iniciar o servidor no Windows.
+- `docs/guia_do_usuario.pdf` e `docs/guia_do_usuario.md`: guia de instalação e uso.
 
-A chamada toca enquanto o aplicativo da pessoa chamada está aberto em primeiro plano. Para receber convites, mantenha o app aberto e conectado. O servidor sinaliza convite e aceite, mas o transporte local ainda não criptografa voz nem senha: use uma rede privada confiável.
+## Requisitos
 
-O Android pode solicitar permissão de localização para revelar o nome da rede Wi-Fi. O app usa essa permissão somente para exibir o nome; se ela for negada, a conexão automática continua disponível, mas o nome pode aparecer como indisponível.
+### Para executar o servidor
+
+- Windows com Python 3.10 ou mais recente.
+- Computador e celulares conectados à mesma rede Wi-Fi, sem isolamento entre os aparelhos.
+
+### Para compilar o aplicativo Android
+
+- JDK 17.
+- Android SDK com a plataforma Android API 35.
+- Acesso à internet na primeira compilação para o Gradle baixar o Wrapper e as dependências.
+
+O APK requer Android 8.0 (API 26) ou mais recente.
 
 ## Iniciar o servidor no Windows
 
-1. Instale Python 3.10 ou mais recente.
-2. Execute `iniciar_servidor.bat`, ou abra o PowerShell na pasta do projeto e execute:
+Abra um terminal na pasta do projeto e execute:
 
 ```powershell
-$env:WALKIE_ADMIN_PASSWORD = "escolha-uma-senha-forte"
 python servidor/servidor_walkie.py
 ```
 
-Defina essa senha antes de iniciar o servidor para usar `adm_cadastro.html`. O acesso administrativo usa o usuário `admin` e a senha definida acima. Se não precisar da tela administrativa, remova a linha `$env:WALKIE_ADMIN_PASSWORD`.
+Também é possível iniciar com duplo clique em `iniciar_servidor.bat`. Para usar a administração de contas, inicie pelo PowerShell como descrito na seção [Administrar contas](#administrar-contas). O atalho `.bat` usa os valores de ambiente que já existirem no processo que o iniciou.
 
-3. Se o Firewall do Windows perguntar, permita Python em **redes privadas**.
-4. Para abrir o cadastro, use no navegador do celular ou computador o endereço HTTP impresso no terminal, por exemplo `http://192.168.0.10:8080`. Esse IP serve para a página de cadastro/download; **não precisa digitá-lo no aplicativo**.
-5. Mantenha a janela aberta durante as conversas.
+Na inicialização, o terminal informa o endereço da página, por exemplo `http://192.168.0.10:8080`. Permita o Python no Firewall do Windows em **redes privadas**, caso o Windows solicite. Mantenha a janela do servidor aberta enquanto o aplicativo estiver em uso.
 
-O servidor usa TCP `5000` para chamadas, UDP `5001` para descoberta automática e TCP `8080` para cadastro/download. Todos os aparelhos devem poder se comunicar entre si no Wi-Fi. Redes de convidados ou isolamento de clientes podem bloquear essa comunicação.
+O servidor usa estas portas padrão:
 
-As portas podem ser personalizadas com `WALKIE_WEB_PORT`, `WALKIE_AUDIO_PORT` e `WALKIE_DISCOVERY_PORT`. Para habilitar a administração de cadastros, configure `WALKIE_ADMIN_PASSWORD` antes de iniciar o servidor. O usuário do acesso é `admin`; o navegador solicitará usuário e senha ao abrir `adm_cadastro.html`. Sem essa variável, as operações administrativas ficam desabilitadas.
+| Serviço | Porta e protocolo | Uso |
+| --- | --- | --- |
+| Páginas Web e download | `8080/TCP` | Cadastro, administração e download do APK |
+| Chamadas e áudio | `5000/TCP` | Login, convites, controles e transmissão de voz |
+| Descoberta automática | `5001/UDP` | Localizar o servidor na mesma rede |
 
-O site inclui `web/inicio.html`, `web/cadastro.html`, `web/apk.html` e `web/adm_cadastro.html`, todas com o mesmo menu. `web/index.html` continua disponível como página inicial para manter o endereço `/` e o caminho `/index.html` funcionando. Na administração é possível adicionar, editar nome/senha e excluir usuários; o ID permanece o mesmo ao editar e as senhas são armazenadas somente como hash.
+As portas podem ser alteradas pelas variáveis `WALKIE_WEB_PORT`, `WALKIE_AUDIO_PORT` e `WALKIE_DISCOVERY_PORT`. Se alterar as portas, libere os novos valores no firewall e mantenha a configuração coerente com o aplicativo.
 
-## Criar e instalar o app Android pelo terminal
+## Criar uma conta e conversar
 
-Não é preciso abrir o Android Studio. O computador precisa de JDK 17 e Android SDK com plataforma API 35. No PowerShell, na pasta principal do projeto, configure o Java e o local padrão do SDK:
+1. Inicie o servidor e conecte os celulares à mesma rede Wi-Fi do computador.
+2. No navegador, abra o endereço exibido pelo servidor e toque em **Criar acesso**.
+3. Informe um nome e crie uma senha com 8 a 128 caracteres. Guarde o ID gerado e a senha.
+4. Compile e instale o APK conforme a seção [Compilar o aplicativo Android](#compilar-o-aplicativo-android).
+5. No aplicativo, entre com seu ID e senha. A permissão de microfone é necessária para falar. A permissão de localização é solicitada para que o Android possa revelar o nome da rede Wi-Fi; se for negada, a conexão automática ainda pode funcionar.
+6. Escolha uma pessoa que esteja online e toque em **Chamar**. A pessoa chamada precisa estar com o aplicativo aberto e aceitar o convite.
+7. Depois do aceite, segure **Toque e segure para falar** enquanto fala e solte para parar. O áudio é encaminhado somente à outra pessoa da chamada aceita.
+8. Use **Encerrar chamada** para finalizar ou **Desconectar e voltar** para sair da conexão.
+
+O aplicativo mostra a lista de pessoas conectadas e permite guardar IDs como favoritos no próprio celular. Favoritos permanecem salvos mesmo quando a pessoa está offline. Cada usuário deve usar seu próprio ID; entrar com o mesmo ID em outro aparelho substitui a sessão anterior.
+
+## Administrar contas
+
+A administração fica disponível em `adm_cadastro.html` e exige uma senha definida pelo responsável pelo servidor. No PowerShell, defina a variável e inicie o servidor na mesma janela:
+
+```powershell
+$env:WALKIE_ADMIN_PASSWORD = "substitua-por-uma-senha-forte"
+python servidor/servidor_walkie.py
+```
+
+Abra o endereço exibido pelo servidor seguido de `/adm_cadastro.html`, por exemplo `http://192.168.0.10:8080/adm_cadastro.html`. Quando o navegador solicitar as credenciais, use o usuário `admin` e a senha configurada em `WALKIE_ADMIN_PASSWORD`.
+
+Na tela administrativa é possível:
+
+- adicionar um cadastro com nome e senha;
+- editar o nome mantendo o ID atual;
+- trocar a senha informando uma nova senha no campo correspondente, ou manter a senha deixando-o em branco;
+- excluir um cadastro.
+
+Sem `WALKIE_ADMIN_PASSWORD`, as operações administrativas ficam desabilitadas. A tela pode continuar acessível, mas não poderá listar nem alterar usuários.
+
+## Compilar o aplicativo Android
+
+No PowerShell, na pasta principal do projeto, configure o Java e o caminho do SDK. Ajuste o caminho do JDK se a instalação local estiver em outro lugar:
 
 ```powershell
 $env:JAVA_HOME = "C:\Program Files\Eclipse Adoptium\jdk-17.0.20.101-hotspot"
@@ -53,7 +98,7 @@ java -version
 Test-Path "$env:ANDROID_HOME\platforms\android-35"
 ```
 
-Essas variáveis valem para esta janela do PowerShell. Abra outra janela e repita os comandos se necessário. Confirme Java 17 e resultado `True` no último comando. Se o SDK estiver em outro caminho, ajuste `ANDROID_HOME`. Se API 35 não estiver instalada, use `sdkmanager`:
+Confirme que o Java é a versão 17 e que o último comando retorna `True`. Se o Android SDK estiver em outro diretório, ajuste `ANDROID_HOME`. Para instalar a plataforma 35 usando as Android Command-line Tools:
 
 ```powershell
 $env:PATH = "$env:ANDROID_HOME\cmdline-tools\latest\bin;$env:PATH"
@@ -61,40 +106,64 @@ sdkmanager --licenses
 sdkmanager "platforms;android-35" "build-tools;34.0.0"
 ```
 
-Aceite as licenças. Se `sdkmanager` não for encontrado, instale as [Android Command-line Tools](https://developer.android.com/tools/sdkmanager) ou corrija o caminho do SDK.
+Aceite as licenças exibidas. Se `sdkmanager` não for encontrado, instale as [Android Command-line Tools](https://developer.android.com/tools/sdkmanager) ou ajuste o caminho para a pasta que contém o executável.
 
-Execute a compilação no terminal:
+Compile o APK de depuração:
 
 ```powershell
 .\gradlew.bat clean
 if ($LASTEXITCODE -eq 0) { .\gradlew.bat assembleDebug }
 ```
 
-Não execute somente `.\gradlew.bat`: sem uma tarefa, o Gradle mostra a ajuda e não cria o APK. Na primeira compilação, o Wrapper baixa Gradle 8.9, então o computador precisa de internet. O APK de depuração será criado em `android/app/build/outputs/apk/debug/app-debug.apk`. Transfira-o ao celular, instale e permita o microfone.
+Não execute somente `.\gradlew.bat` sem uma tarefa: isso mostra a ajuda do Gradle e não compila o aplicativo. Quando a compilação terminar com `BUILD SUCCESSFUL`, o APK estará em `android/app/build/outputs/apk/debug/app-debug.apk`. Transfira esse arquivo ao celular, instale-o e permita a instalação de aplicativos dessa fonte, se o Android solicitar.
 
-O app requer Android 8.0 (API 26) ou mais novo. Para publicar numa loja é necessário gerar uma versão de lançamento assinada.
+Depois que o APK existir nesse caminho, a página **APK** do site permite baixá-lo. Se ainda não foi compilado, o servidor informa que o APK não está disponível. O projeto gera um APK de depuração; para distribuir por uma loja, é necessário preparar e assinar uma versão de lançamento.
+
+## Dados e configurações do servidor
+
+O servidor cria `usuarios.json` na pasta principal do projeto. As senhas das contas são salvas como hashes PBKDF2-HMAC-SHA256 com salt aleatório; o arquivo não guarda as senhas em texto puro. Faça cópias de segurança desse arquivo para preservar os cadastros.
+
+As variáveis de ambiente disponíveis são:
+
+| Variável | Valor padrão | Finalidade |
+| --- | --- | --- |
+| `WALKIE_WEB_PORT` | `8080` | Porta TCP do site e do download |
+| `WALKIE_AUDIO_PORT` | `5000` | Porta TCP de chamadas e áudio |
+| `WALKIE_DISCOVERY_PORT` | `5001` | Porta UDP de descoberta automática |
+| `WALKIE_DATA_FILE` | `usuarios.json` na pasta do projeto | Caminho alternativo para o arquivo de contas |
+| `WALKIE_ADMIN_PASSWORD` | não definido | Senha necessária para administrar contas |
+
+As variáveis definidas no PowerShell valem para aquela janela e para os processos iniciados nela. Para manter uma configuração entre sessões, configure as variáveis no Windows antes de iniciar o servidor.
 
 ## Guia para iniciantes
 
-O [guia em PDF](docs/guia_do_usuario.pdf) explica a instalação e o uso pelo celular. A fonte editável fica em [docs/guia_do_usuario.md](docs/guia_do_usuario.md). Após atualizar a fonte, regenere as cópias com:
+O [guia do usuário em PDF](docs/guia_do_usuario.pdf) explica a instalação e o uso pelo celular. O arquivo editável é [docs/guia_do_usuario.md](docs/guia_do_usuario.md). Para gerar novamente as cópias do PDF após editar o guia:
 
 ```powershell
 python docs/gerar_pdf.py
 ```
 
-O script atualiza `docs/guia_do_usuario.pdf` e `output/pdf/Nextel_Local_Guia_do_Usuario.pdf`.
+O script salva `docs/guia_do_usuario.pdf` e `output/pdf/Nextel_Local_Guia_do_Usuario.pdf`.
 
-## Privacidade e limites
+## Limitações e segurança
 
-- ID e senha ficam criptografados no armazenamento privado do app após o primeiro login bem-sucedido. Ao limpar os dados do app ou reinstalá-lo, será necessário digitá-los novamente.
-- O servidor guarda somente hashes das senhas em `usuarios.json`.
-- O tráfego de senha e áudio não usa criptografia de transporte. Use uma rede confiável e não exponha as portas à internet.
-- O servidor encaminha áudio apenas entre participantes de uma chamada aceita; não há sala geral, histórico ou notificações quando o app está fechado.
-- Os favoritos guardam somente IDs no aparelho e continuam visíveis mesmo quando esses contatos estão offline.
-- Cada pessoa deve usar seu próprio ID; entrar com o mesmo ID em outro celular substitui a sessão anterior.
-- Se a conexão cair ao chamar, entre novamente. O terminal do servidor informa se o convite foi enviado ou se o contato estava offline/ocupado.
-- A descoberta automática funciona na mesma rede Wi-Fi acessível ao computador servidor. Não funciona através de redes diferentes ou da rede móvel.
+- O servidor e os celulares precisam estar na mesma rede Wi-Fi, com comunicação local permitida. Redes de convidados podem bloquear a descoberta ou o tráfego entre aparelhos.
+- Mantenha o aplicativo aberto e conectado para receber convites. Não há notificações quando o aplicativo está fechado.
+- A voz só é encaminhada entre as duas pessoas de uma chamada aceita; não há sala geral nem histórico de áudio.
+- O servidor usa HTTP sem TLS. A senha administrativa e os dados enviados pelo site não são protegidos durante o transporte. Use somente uma rede privada confiável, escolha uma senha administrativa forte e não exponha as portas do servidor à internet.
+- A senha e o áudio enviados pelo aplicativo também não têm criptografia de transporte. Use somente uma rede confiável e não encaminhe as portas do roteador para a internet.
+- O aplicativo guarda as credenciais criptografadas no armazenamento privado do aparelho depois de um login bem-sucedido. Se os dados do aplicativo forem apagados ou ele for reinstalado, será preciso informar ID e senha novamente.
+- Se a conexão cair ou uma pessoa estiver offline/ocupada, confira a mensagem no aplicativo e os registros exibidos no terminal do servidor.
 
-## Referência histórica
+## Solução de problemas
 
-FleetCall foi fundada em 1987 e adotou o nome Nextel em 1993. A Motorola desenvolveu iDEN (*Integrated Digital Enhanced Network*), lançada comercialmente pela Nextel nos EUA em 1996; o serviço Direct Connect popularizou PTT nos anos 2000. SMR significa *Specialized Mobile Radio*. Esses marcos inspiram a interação do protótipo, que opera somente por Wi-Fi local. Veja a [linha do tempo da Motorola Solutions](https://www.motorolasolutions.com/content/dam/msi/docs/products/broadband-ptt/wave-ebook.pdf) e o [registro da SEC sobre iDEN e Nextel](https://www.sec.gov/Archives/edgar/data/824169/000095013301502789/w53721aex99-1.htm).
+- **A página não abre no celular:** confirme que o celular e o computador estão no mesmo Wi-Fi, use o endereço exibido pelo servidor e permita Python no Firewall do Windows para redes privadas.
+- **O aplicativo não encontra o servidor:** confira se UDP `5001` está liberado e se o roteador permite comunicação entre aparelhos conectados. Redes de convidados podem impedir isso.
+- **O login falha:** confira o ID e a senha. As contas ficam no `usuarios.json` usado pelo servidor; se `WALKIE_DATA_FILE` estiver configurada, confira o caminho alternativo.
+- **A tela administrativa pede senha repetidamente ou não carrega os dados:** inicie o servidor com `WALKIE_ADMIN_PASSWORD` definida na mesma janela e use usuário `admin` com essa senha.
+- **A página APK diz que o arquivo não existe:** compile o projeto Android e confirme que `android/app/build/outputs/apk/debug/app-debug.apk` foi criado.
+- **O áudio não funciona:** permita o uso do microfone, mantenha os dois aplicativos abertos e conectados e confirme que o TCP `5000` está permitido na rede local.
+
+## Versão atual
+
+O aplicativo Android está configurado como versão **1.7** (`versionCode 8`), com `compileSdk` e `targetSdk` 35 e versão mínima Android 8.0 (API 26). O servidor é um protótipo local e deve ser mantido atualizado conforme o projeto evoluir.
