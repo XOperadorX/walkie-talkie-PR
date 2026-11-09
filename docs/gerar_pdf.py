@@ -3,9 +3,9 @@ from pathlib import Path
 import textwrap
 
 ROOT = Path(__file__).resolve().parents[1]
-DESTINATIONS = [ROOT / "docs" / "guia_do_usuario.pdf", ROOT / "output" / "pdf" / "Nextel_Local_Guia_do_Usuario.pdf"]
+DESTINATIONS = [ROOT / "docs" / "guia_do_usuario.pdf", ROOT / "output" / "pdf" / "VORIQ_Guia_do_Usuario.pdf"]
 WIDTH, HEIGHT = 595, 842
-VERSION = "1.7"
+VERSION = "1.9"
 
 
 def encoded(text):
@@ -13,10 +13,10 @@ def encoded(text):
 
 
 def build_page(sections, page_number):
-    commands = [b"q", b"0.95 0.97 0.98 rg", b"0 0 595 842 re f", b"Q"]
+    commands = [b"q", b"0.024 0.071 0.145 rg", b"0 0 595 842 re f", b"Q"]
     y = 790
 
-    def line(text, size=10, bold=False, color="0.14 0.24 0.33", indent=52, leading=None):
+    def line(text, size=10, bold=False, color="0.91 0.95 1", indent=52, leading=None):
         nonlocal y
         leading = leading or round(size * 1.45)
         width = max(35, int((540 - indent) / (size * 0.51)))
@@ -28,25 +28,25 @@ def build_page(sections, page_number):
 
     for kind, value in sections:
         if kind == "title":
-            commands += [b"0.06 0.16 0.26 rg", f"0 700 {WIDTH} 142 re f".encode()]
+            commands += [b"0.03 0.10 0.20 rg", f"0 700 {WIDTH} 142 re f".encode()]
             line(value, 24, True, "1 1 1", 52, 34)
             y -= 8
         elif kind == "heading":
             y -= 6
-            line(value, 14, True, "0.03 0.49 0.54", 52, 20)
+            line(value, 14, True, "0.09 0.82 0.94", 52, 20)
             y -= 2
         elif kind == "step":
             line(value, 9.5, False, indent=65, leading=13)
             y -= 2
         elif kind == "note":
-            line(value, 9, True, "0.42 0.32 0.12", 60, 13)
+            line(value, 9, True, "0.35 0.88 0.96", 60, 13)
             y -= 3
         else:
             line(value, 9.5, False, indent=52, leading=14)
             y -= 3
 
     commands += [b"0.38 0.49 0.59 RG 0.5 w 52 42 m 543 42 l S"]
-    footer = encoded(f"Nextel Local | Guia do usuario | versao {VERSION}")
+    footer = encoded(f"VORIQ | Guia do usuario | versao {VERSION}")
     commands += [b"BT /F1 8 Tf 0.38 0.49 0.59 rg 1 0 0 1 52 27 Tm <" + footer + b"> Tj ET"]
     commands += [f"BT /F1 8 Tf 0.38 0.49 0.59 rg 1 0 0 1 530 27 Tm <{page_number:02d}> Tj ET".encode()]
     return b"\n".join(commands)
@@ -54,9 +54,9 @@ def build_page(sections, page_number):
 
 pages = [
     [
-        ("title", "Nextel Local | Guia do celular"),
+        ("title", "VORIQ | Guia do celular"),
         ("heading", "O que este aplicativo faz"),
-        ("body", "O app tem duas telas: a primeira pede ID e senha e mostra o nome do Wi-Fi; a segunda mostra favoritos e pessoas disponíveis. Uma pessoa chama, a outra ouve dois bipes e aceita. Depois, cada pessoa segura o botão para falar e solta para parar."),
+        ("body", "O app tem duas telas: a primeira pede ID e senha e mostra o nome do Wi-Fi; a segunda mostra o comunicador e atalhos. Toque em Contatos para abrir favoritos e pessoas disponíveis. Uma pessoa chama, a outra ouve dois bipes e aceita. Depois, cada pessoa segura o botão para falar e solta para parar."),
         ("heading", "Antes de começar"),
         ("step", "1. Tenha um computador Windows com Python 3.10 ou mais novo."),
         ("step", "2. Cada participante precisa de um celular Android 8.0 ou mais novo."),
@@ -89,7 +89,7 @@ pages = [
         ("body", "if ($LASTEXITCODE -eq 0) { .\\gradlew.bat assembleDebug }"),
         ("step", "4. Aguarde BUILD SUCCESSFUL. Executar apenas .\\gradlew.bat mostra a ajuda e não gera o APK."),
         ("step", "5. O instalador fica em android/app/build/outputs/apk/debug/app-debug.apk. Transfira-o ao celular e abra o arquivo."),
-        ("step", "6. Se solicitado, permita instalar apps desta fonte. Abra Nextel Local e permita o microfone."),
+        ("step", "6. Se solicitado, permita instalar apps desta fonte. Abra VORIQ e permita o microfone."),
         ("note", "Na primeira compilação, o Gradle baixa arquivos pela internet. Não precisa instalar Gradle separadamente."),
         ("heading", "4. Entrar no aplicativo"),
         ("step", "1. A primeira tela mostra a versão do app e o nome do Wi-Fi. Digite ID e senha. Depois do login, o app guarda as credenciais criptografadas no celular."),
@@ -109,13 +109,13 @@ pages = [
         ("body", "Conexão interrompida ao chamar: entre novamente e tente chamar alguém conectado. O terminal informa se o convite foi enviado ou se a pessoa estava offline/ocupada."),
         ("body", "Pessoa não aparece: ela precisa conectar o app ao mesmo servidor e Wi-Fi."),
         ("body", "Botão de falar cinza: aguarde a outra pessoa aceitar a chamada. O botão só ativa depois do aceite."),
-        ("body", "Não consegue falar: habilite Microfone em Configurações > Aplicativos > Nextel Local > Permissões e tente novamente."),
+        ("body", "Não consegue falar: habilite Microfone em Configurações > Aplicativos > VORIQ > Permissões e tente novamente."),
         ("body", "ID e senha não preencheram: digite-os novamente. O salvamento automático só ocorre depois de login bem-sucedido. Apagar os dados do app ou reinstalar remove as credenciais salvas."),
         ("heading", "Privacidade e limites"),
         ("body", "As credenciais guardadas no celular são criptografadas. Os favoritos guardam os IDs no aparelho. O servidor armazena hashes de senha em usuarios.json. A senha e o áudio não são criptografados durante o envio pela rede: use Wi-Fi privado e confiável, e não exponha as portas à internet."),
         ("body", "O computador servidor é necessário. A descoberta funciona somente no mesmo Wi-Fi acessível ao computador; não funciona entre redes diferentes nem pela rede móvel."),
-        ("heading", "Sobre o nome Nextel"),
-        ("body", "O projeto é independente, sem vínculo oficial com Nextel ou Motorola. Não usa rádio SMR, tecnologia iDEN ou rede celular. FleetCall, PTT e a história da Nextel são referências de inspiração; esta versão faz chamadas privadas pela rede Wi-Fi local."),
+        ("heading", "Identidade VORIQ"),
+        ("body", "Marca VORIQ. Slogan: Sua voz. Sua conexão. Categoria: Comunicador Wi-Fi. A versão 1.9 permite chamadas privadas entre duas pessoas pela rede Wi-Fi local. Os atalhos de grupos e configurações são prévias; esses recursos, canais e áudio HD ainda não estão implementados."),
     ],
 ]
 

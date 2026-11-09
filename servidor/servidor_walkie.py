@@ -401,7 +401,7 @@ class WebHandler(BaseHTTPRequestHandler):
             conteudo = apk.read_bytes()
             self.send_response(200)
             self.send_header("Content-Type", "application/vnd.android.package-archive")
-            self.send_header("Content-Disposition", 'attachment; filename="nextel-local-debug.apk"')
+            self.send_header("Content-Disposition", 'attachment; filename="voriq-android.apk"')
             self.send_header("Content-Length", str(len(conteudo)))
             self.end_headers()
             self.wfile.write(conteudo)
@@ -500,7 +500,7 @@ class WebHandler(BaseHTTPRequestHandler):
         esperado = "Basic " + base64.b64encode(("admin:" + SENHA_ADMIN).encode("utf-8")).decode("ascii")
         if not hmac.compare_digest(self.headers.get("Authorization", ""), esperado):
             self.send_response(401)
-            self.send_header("WWW-Authenticate", 'Basic realm="Nextel Local - Administração", charset="UTF-8"')
+            self.send_header("WWW-Authenticate", 'Basic realm="VORIQ - Administração", charset="UTF-8"')
             self.send_header("Content-Length", "0")
             self.end_headers()
             return False
@@ -566,7 +566,7 @@ def main() -> None:
     descoberta = DiscoveryServer((HOST, PORTA_DESCOBERTA), DiscoveryHandler)
     threading.Thread(target=descoberta.serve_forever, name="descoberta", daemon=True).start()
     web = ThreadingHTTPServer((HOST, PORTA_WEB), WebHandler)
-    print("Nextel Local (protótipo) ativo na rede Wi-Fi local")
+    print("VORIQ (protótipo) ativo na rede Wi-Fi local")
     print(f"Cadastro/download: http://{obter_ip_local()}:{PORTA_WEB}")
     print(f"Áudio TCP: porta {PORTA_SERVIDOR}")
     print(f"Descoberta Wi-Fi UDP: porta {PORTA_DESCOBERTA}")

@@ -1,9 +1,31 @@
 <resources>
-    <style name="AppTheme" parent="android:style/Theme.Material.Light.NoActionBar">
+    <style name="AppTheme" parent="android:style/Theme.Material.NoActionBar">
         <item name="android:fontFamily">sans</item>
-        <item name="android:colorAccent">#087E8B</item>
-        <item name="android:statusBarColor">#102A43</item>
-        <item name="android:navigationBarColor">#102A43</item>
+        <item name="android:colorAccent">#18D8F4</item>
+        <item name="android:statusBarColor">#061225</item>
+        <item name="android:navigationBarColor">#061225</item>
         <item name="android:windowLightStatusBar">false</item>
+    </style>
+    <style name="AtalhoVoriq">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">58dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:orientation">vertical</item>
+        <item name="android:gravity">center</item>
+        <item name="android:background">@drawable/tile_voriq</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+    <style name="ImagemAtalhoVoriq">
+        <item name="android:layout_width">20dp</item>
+        <item name="android:layout_height">20dp</item>
+        <item name="android:tint">#18D8F4</item>
+    </style>
+    <style name="TextoAtalhoVoriq">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">#F1F7FF</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
     </style>
 </resources>

@@ -1,8 +1,22 @@
-# Nextel Local
+# VORIQ
+
+## Sua voz. Sua conexão.
+
+Comunicador Wi-Fi para chamadas privadas entre pessoas conectadas à mesma rede local. O computador que executa o servidor precisa permanecer ligado durante o uso.
 
 Aplicativo experimental de comunicação por voz em uma rede Wi-Fi local. O projeto reúne um servidor Python, páginas Web para criar e administrar contas e um aplicativo Android com chamadas privadas e botão Push-to-Talk (PTT).
 
-O projeto não é um produto oficial da Nextel ou da Motorola e não usa rádio SMR, iDEN nem rede de operadora. O computador que executa o servidor precisa ficar ligado durante o uso.
+VORIQ é um projeto independente. Ele não usa rede de operadora; os celulares e o servidor precisam estar no mesmo Wi-Fi.
+
+## Identidade
+
+- **Marca:** VORIQ
+- **Slogan:** Sua voz. Sua conexão.
+- **Categoria:** Comunicador Wi-Fi
+- **Autor:** Moises20XX
+- **Empresa:** MMQuaseTudo
+- **Cores:** azul-noturno, azul digital e ciano
+- **Símbolo:** letra V com ondas de rádio
 
 ## O que está incluído
 
@@ -143,7 +157,7 @@ O [guia do usuário em PDF](docs/guia_do_usuario.pdf) explica a instalação e o
 python docs/gerar_pdf.py
 ```
 
-O script salva `docs/guia_do_usuario.pdf` e `output/pdf/Nextel_Local_Guia_do_Usuario.pdf`.
+O script salva `docs/guia_do_usuario.pdf` e `output/pdf/VORIQ_Guia_do_Usuario.pdf`.
 
 ## Limitações e segurança
 
@@ -166,4 +180,4 @@ O script salva `docs/guia_do_usuario.pdf` e `output/pdf/Nextel_Local_Guia_do_Usu
 
 ## Versão atual
 
-O aplicativo Android está configurado como versão **1.7** (`versionCode 8`), com `compileSdk` e `targetSdk` 35 e versão mínima Android 8.0 (API 26). O servidor é um protótipo local e deve ser mantido atualizado conforme o projeto evoluir.
+O aplicativo Android está configurado como versão **1.9** (`versionCode 10`), com `compileSdk` e `targetSdk` 35 e versão mínima Android 8.0 (API 26). A tela principal apresenta o botão PTT e atalhos; **Contatos** abre favoritos e pessoas online. Esta versão mantém chamadas privadas entre duas pessoas e descoberta automática do servidor. Grupos, canais e áudio HD das imagens conceituais ainda não estão implementados.

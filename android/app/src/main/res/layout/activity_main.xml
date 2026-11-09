@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/scrollPrincipal"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    android:background="#EDF3F8">
+    android:background="#061225">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center_horizontal"
-        android:padding="22dp">
+        android:padding="16dp">
 
         <LinearLayout
             android:id="@+id/telaLogin"
@@ -22,8 +23,8 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="📡 Nextel Local"
-                android:textColor="#102A43"
+                android:text="VORIQ"
+                android:textColor="#18D8F4"
                 android:textSize="27sp"
                 android:textStyle="bold"
                 android:layout_marginTop="18dp"
@@ -32,8 +33,8 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Entre com seu ID e senha para ver quem está disponível no seu Wi-Fi."
-                android:textColor="#52687B"
+                android:text="SUA VOZ. SUA CONEXÃO.\nEntre para encontrar pessoas no mesmo Wi-Fi."
+                android:textColor="#DCEBFA"
                 android:gravity="center"
                 android:layout_marginBottom="14dp" />
 
@@ -42,7 +43,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Wi-Fi conectado: verificando..."
-                android:textColor="#087E8B"
+                android:textColor="#18D8F4"
                 android:textStyle="bold"
                 android:gravity="center"
                 android:padding="12dp" />
@@ -83,7 +84,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Desconectado"
-                android:textColor="#52687B"
+                android:textColor="#DCEBFA"
                 android:gravity="center"
                 android:padding="12dp" />
 
@@ -91,7 +92,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="O nome da rede Wi-Fi é exibido quando o Android permite a leitura das informações da rede."
-                android:textColor="#718394"
+                android:textColor="#A8BDD4"
                 android:textSize="12sp"
                 android:gravity="center"
                 android:padding="8dp" />
@@ -101,7 +102,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Versão"
-                android:textColor="#718394"
+                android:textColor="#A8BDD4"
                 android:textSize="12sp"
                 android:gravity="center"
                 android:padding="6dp" />
@@ -114,132 +115,124 @@
             android:orientation="vertical"
             android:visibility="gone">
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Pessoas disponíveis nesta rede"
-                android:textColor="#102A43"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                android:layout_marginTop="12dp"
-                android:gravity="center" />
-
-            <TextView
-                android:id="@+id/tvWifiPrincipal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Wi-Fi conectado"
-                android:textColor="#087E8B"
-                android:textStyle="bold"
-                android:gravity="center"
-                android:padding="10dp" />
-
-            <TextView
-                android:id="@+id/tvStatusPrincipal"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Conectado"
-                android:textColor="#52687B"
-                android:gravity="center"
-                android:padding="8dp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Favoritos"
-                android:textColor="#102A43"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="4dp" />
-
-            <LinearLayout
-                android:id="@+id/layoutFavoritos"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Todas as pessoas online"
-                android:textColor="#102A43"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:layout_marginTop="14dp"
-                android:layout_marginBottom="4dp" />
-
-            <LinearLayout
-                android:id="@+id/layoutUsuarios"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical" />
-
-            <TextView
-                android:id="@+id/tvChamada"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Nenhuma chamada"
-                android:textColor="#52687B"
-                android:gravity="center"
-                android:padding="12dp" />
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:gravity="center">
-                <Button
-                    android:id="@+id/btnAceitar"
+                android:padding="2dp">
+                <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Aceitar"
-                    android:textAllCaps="false"
-                    android:visibility="gone" />
-                <Button
-                    android:id="@+id/btnRecusar"
-                    android:layout_width="0dp"
+                    android:orientation="vertical">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="VORIQ" android:textColor="#18D8F4" android:textSize="22sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="SUA VOZ. SUA CONEXÃO." android:textColor="#A8BDD4" android:textSize="10sp" />
+                </LinearLayout>
+                <TextView
+                    android:id="@+id/tvStatusPrincipal"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Recusar"
-                    android:textAllCaps="false"
-                    android:visibility="gone" />
+                    android:background="@drawable/status_pill"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp"
+                    android:text="Conectado"
+                    android:textColor="#21E68A"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
             </LinearLayout>
 
-            <Button
-                android:id="@+id/btnEncerrar"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Encerrar chamada"
-                android:textAllCaps="false"
-                android:visibility="gone" />
+                android:layout_marginTop="12dp"
+                android:background="@drawable/panel_voriq"
+                android:gravity="center_horizontal"
+                android:orientation="vertical"
+                android:padding="14dp">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal">
+                    <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="COMUNICADOR" android:textColor="#EAF4FF" android:textSize="14sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="⌁" android:textColor="#18D8F4" android:textSize="22sp" />
+                </LinearLayout>
+                <TextView
+                    android:id="@+id/tvWifiPrincipal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Rede Wi-Fi local"
+                    android:textColor="#B8C9DC"
+                    android:textSize="12sp" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Chamada privada" android:textColor="#FFFFFF" android:textSize="18sp" android:textStyle="bold" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="Converse com uma pessoa conectada" android:textColor="#B8C9DC" android:textSize="12sp" />
 
-            <Button
-                android:id="@+id/btnFalar"
-                android:layout_width="match_parent"
-                android:layout_height="76dp"
-                android:text="Toque e segure para falar"
-                android:textAllCaps="false"
-                android:textSize="18sp"
-                android:enabled="false"
-                android:layout_marginTop="14dp" />
+                <Button
+                    android:id="@+id/btnFalar"
+                    android:layout_width="132dp"
+                    android:layout_height="132dp"
+                    android:layout_marginTop="18dp"
+                    android:background="@drawable/ptt_button"
+                    android:drawableTop="@drawable/ic_mic"
+                    android:drawablePadding="4dp"
+                    android:gravity="center"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp"
+                    android:padding="12dp"
+                    android:text="SEGURE"
+                    android:textAllCaps="false"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:enabled="false" />
 
-            <TextView
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:gravity="center" android:text="PRESSIONE PARA FALAR" android:textColor="#EAF4FF" android:textSize="14sp" android:textStyle="bold" />
+                <TextView android:id="@+id/tvChamada" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="5dp" android:gravity="center" android:text="Entre em Contatos e chame alguém" android:textColor="#B8C9DC" android:textSize="12sp" />
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:gravity="center" android:orientation="horizontal">
+                    <Button android:id="@+id/btnAceitar" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Aceitar" android:textAllCaps="false" android:visibility="gone" />
+                    <Button android:id="@+id/btnRecusar" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="Recusar" android:textAllCaps="false" android:visibility="gone" />
+                    <Button android:id="@+id/btnEncerrar" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Encerrar chamada" android:textAllCaps="false" android:visibility="gone" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:orientation="horizontal">
+                <LinearLayout android:id="@+id/atalhoGrupos" style="@style/AtalhoVoriq" android:layout_marginEnd="4dp">
+                    <ImageView style="@style/ImagemAtalhoVoriq" android:src="@drawable/ic_group_tile" android:contentDescription="Ícone de grupos" />
+                    <TextView style="@style/TextoAtalhoVoriq" android:text="Grupos" />
+                </LinearLayout>
+                <LinearLayout android:id="@+id/atalhoContatos" style="@style/AtalhoVoriq" android:layout_marginStart="4dp">
+                    <ImageView style="@style/ImagemAtalhoVoriq" android:src="@drawable/ic_contact_tile" android:contentDescription="Ícone de contatos" />
+                    <TextView style="@style/TextoAtalhoVoriq" android:text="Contatos" />
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="8dp" android:orientation="horizontal">
+                <LinearLayout android:id="@+id/atalhoComunicacao" style="@style/AtalhoVoriq" android:layout_marginEnd="4dp">
+                    <ImageView style="@style/ImagemAtalhoVoriq" android:src="@drawable/ic_radio_tile" android:contentDescription="Ícone de comunicação" />
+                    <TextView style="@style/TextoAtalhoVoriq" android:text="Comunicação" />
+                </LinearLayout>
+                <LinearLayout android:id="@+id/atalhoConfiguracoes" style="@style/AtalhoVoriq" android:layout_marginStart="4dp">
+                    <ImageView style="@style/ImagemAtalhoVoriq" android:src="@drawable/ic_settings_tile" android:contentDescription="Ícone de configurações" />
+                    <TextView style="@style/TextoAtalhoVoriq" android:text="Configurações" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/areaContatos"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Você só transmite áudio depois que a outra pessoa aceita a chamada."
-                android:textColor="#52687B"
-                android:gravity="center"
-                android:padding="10dp" />
-
-            <Button
-                android:id="@+id/btnDesconectar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Desconectar e voltar"
-                android:textAllCaps="false"
-                android:layout_marginTop="12dp" />
+                android:layout_marginTop="10dp"
+                android:background="@drawable/panel_voriq"
+                android:orientation="vertical"
+                android:padding="14dp"
+                android:visibility="gone">
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Favoritos" android:textColor="#FFFFFF" android:textSize="18sp" android:textStyle="bold" />
+                <LinearLayout android:id="@+id/layoutFavoritos" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" />
+                <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Pessoas online" android:textColor="#FFFFFF" android:textSize="18sp" android:textStyle="bold" />
+                <LinearLayout android:id="@+id/layoutUsuarios" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" />
+                <Button android:id="@+id/btnDesconectar" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="12dp" android:text="Desconectar" android:textAllCaps="false" />
+            </LinearLayout>
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:gravity="center" android:text="PRÉVIA CONCEITUAL DA TELA PRINCIPAL" android:textColor="#A8BDD4" android:textSize="10sp" />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

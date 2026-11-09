@@ -23,9 +23,11 @@ import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
 import android.view.MotionEvent
+import android.graphics.drawable.GradientDrawable
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import org.json.JSONArray
@@ -65,6 +67,8 @@ class MainActivity : android.app.Activity() {
     private lateinit var etSenha: EditText
     private lateinit var telaLogin: LinearLayout
     private lateinit var telaPrincipal: LinearLayout
+    private lateinit var areaContatos: LinearLayout
+    private lateinit var scrollPrincipal: ScrollView
     private lateinit var btnConectar: Button
     private lateinit var btnDesconectar: Button
     private lateinit var btnFalar: Button
@@ -107,6 +111,8 @@ class MainActivity : android.app.Activity() {
         setContentView(R.layout.activity_main)
         telaLogin = findViewById(R.id.telaLogin)
         telaPrincipal = findViewById(R.id.telaPrincipal)
+        areaContatos = findViewById(R.id.areaContatos)
+        scrollPrincipal = findViewById(R.id.scrollPrincipal)
         etId = findViewById(R.id.etId)
         etSenha = findViewById(R.id.etSenha)
         btnConectar = findViewById(R.id.btnConectar)
@@ -132,6 +138,30 @@ class MainActivity : android.app.Activity() {
         btnAceitar.setOnClickListener { aceitarChamada() }
         btnRecusar.setOnClickListener { recusarChamada() }
         btnEncerrar.setOnClickListener { encerrarChamadaLocal() }
+        findViewById<LinearLayout>(R.id.atalhoContatos).setOnClickListener {
+            areaContatos.visibility = if (areaContatos.visibility == android.view.View.VISIBLE) {
+                android.view.View.GONE
+            } else {
+                android.view.View.VISIBLE
+            }
+            if (areaContatos.visibility == android.view.View.VISIBLE) {
+                areaContatos.post {
+                    val destino = android.graphics.Rect()
+                    areaContatos.getDrawingRect(destino)
+                    scrollPrincipal.offsetDescendantRectToMyCoords(areaContatos, destino)
+                    scrollPrincipal.smoothScrollTo(0, destino.top)
+                }
+            }
+        }
+        findViewById<LinearLayout>(R.id.atalhoGrupos).setOnClickListener {
+            aviso("A criação de grupos estará disponível em uma próxima versão.")
+        }
+        findViewById<LinearLayout>(R.id.atalhoComunicacao).setOnClickListener {
+            aviso("Use Contatos para iniciar uma chamada privada.")
+        }
+        findViewById<LinearLayout>(R.id.atalhoConfiguracoes).setOnClickListener {
+            aviso("As configurações ainda não estão disponíveis.")
+        }
         btnFalar.setOnTouchListener { _, evento ->
             if (!chamadaAtiva.get()) return@setOnTouchListener false
             when (evento.action) {
@@ -375,7 +405,7 @@ class MainActivity : android.app.Activity() {
                     btnRecusar.visibility = android.view.View.VISIBLE
                     btnEncerrar.visibility = android.view.View.GONE
                     btnFalar.isEnabled = false
-                    btnFalar.text = "Aceite a chamada para falar"
+                    btnFalar.text = "SEGURE"
                     renderizarUsuarios()
                 }
             }
@@ -388,7 +418,7 @@ class MainActivity : android.app.Activity() {
                 runOnUiThread {
                     tvChamada.text = "Chamando ${destinoNome ?: "usuário"}... Aguarde a resposta."
                     btnFalar.isEnabled = false
-                    btnFalar.text = "Aguarde o aceite para falar"
+                    btnFalar.text = "SEGURE"
                     btnAceitar.visibility = android.view.View.GONE
                     btnRecusar.visibility = android.view.View.GONE
                     btnEncerrar.visibility = android.view.View.VISIBLE
@@ -414,7 +444,7 @@ class MainActivity : android.app.Activity() {
                     btnRecusar.visibility = android.view.View.GONE
                     btnEncerrar.visibility = android.view.View.VISIBLE
                     btnFalar.isEnabled = true
-                    btnFalar.text = "Toque e segure para falar"
+                    btnFalar.text = "SEGURE"
                     renderizarUsuarios()
                 }
             }
@@ -438,7 +468,7 @@ class MainActivity : android.app.Activity() {
                 runOnUiThread {
                     tvChamada.text = mensagem.optString("mensagem", "Não foi possível iniciar a chamada.")
                     btnFalar.isEnabled = false
-                    btnFalar.text = "Toque e segure para falar"
+                    btnFalar.text = "SEGURE"
                     btnAceitar.visibility = android.view.View.GONE
                     btnRecusar.visibility = android.view.View.GONE
                     btnEncerrar.visibility = android.view.View.GONE
@@ -484,7 +514,7 @@ class MainActivity : android.app.Activity() {
     private fun adicionarMensagemLista(lista: LinearLayout, texto: String) {
         val mensagem = TextView(this).apply {
             this.text = texto
-            setTextColor(0xff52687b.toInt())
+            setTextColor(0xffdcebfA.toInt())
             setPadding(8, 12, 8, 12)
         }
         lista.addView(mensagem)
@@ -494,11 +524,15 @@ class MainActivity : android.app.Activity() {
         val linha = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = android.view.Gravity.CENTER_VERTICAL
-            setPadding(4, 3, 4, 3)
+            setPadding(8, 4, 4, 4)
+            background = GradientDrawable().apply {
+                setColor(0xff153654.toInt())
+                cornerRadius = 18f
+            }
         }
         val identidade = TextView(this).apply {
             text = "$nome\n$id"
-            setTextColor(0xff18324a.toInt())
+            setTextColor(0xffeef7ff.toInt())
             textSize = 14f
             setPadding(8, 8, 4, 8)
             layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
@@ -577,7 +611,7 @@ class MainActivity : android.app.Activity() {
         pararReproducao()
         runOnUiThread {
             btnFalar.isEnabled = false
-            btnFalar.text = "Toque e segure para falar"
+            btnFalar.text = "SEGURE"
             btnAceitar.visibility = android.view.View.GONE
             btnAceitar.isEnabled = true
             btnRecusar.visibility = android.view.View.GONE
