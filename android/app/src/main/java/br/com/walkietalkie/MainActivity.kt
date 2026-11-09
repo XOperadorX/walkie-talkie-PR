@@ -1,8 +1,14 @@
 package br.com.walkietalkie
 
 import android.Manifest
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.pm.ServiceInfo
 import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioManager
@@ -13,8 +19,10 @@ import android.media.ToneGenerator
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
+import android.net.Uri
 import android.net.wifi.WifiManager
 import android.net.wifi.WifiInfo
+import android.location.LocationManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -24,6 +32,7 @@ import android.security.keystore.KeyProperties
 import android.util.Base64
 import android.view.MotionEvent
 import android.graphics.drawable.GradientDrawable
+import android.provider.Settings
 import android.widget.Button
 import android.widget.EditText
 import android.widget.LinearLayout
@@ -57,10 +66,17 @@ class MainActivity : android.app.Activity() {
         private const val MAX_CONTROLE = 16384
         private const val PEDIDO_MICROFONE = 44
         private const val PEDIDO_LOCALIZACAO_WIFI = 45
+        private const val PEDIDO_NOTIFICACOES = 46
         private const val TOKEN_DESCOBERTA = "NEXTEL_LOCAL_DISCOVER_V1"
         private const val PREFERENCIAS = "acesso_protegido"
         private const val ALIAS_CHAVE = "nextel_local_credenciais_v1"
         private const val VERSAO_DESCONHECIDA = "Versão indisponível"
+        private const val CANAL_CHAMADAS = "voriq_chamadas"
+        private const val ID_NOTIFICACAO_CHAMADA = 7103
+        private const val EXTRA_ACAO_CHAMADA = "voriq_acao_chamada"
+        private const val ACAO_ABRIR_CHAMADA = "abrir_chamada"
+        private const val ACAO_ACEITAR_CHAMADA = "aceitar_chamada"
+        private const val ACAO_RECUSAR_CHAMADA = "recusar_chamada"
     }
 
     private lateinit var etId: EditText
@@ -80,6 +96,7 @@ class MainActivity : android.app.Activity() {
     private lateinit var tvWifiLogin: TextView
     private lateinit var tvWifiPrincipal: TextView
     private lateinit var tvVersao: TextView
+    private lateinit var tvAjudaSegundoPlano: TextView
     private lateinit var tvChamada: TextView
     private lateinit var layoutFavoritos: LinearLayout
     private lateinit var layoutUsuarios: LinearLayout
@@ -102,6 +119,7 @@ class MainActivity : android.app.Activity() {
     @Volatile private var destinoNome: String? = null
     @Volatile private var recebendoConvite = false
     private var solicitouPermissaoNomeWifi = false
+    @Volatile private var activityVisivel = false
 
     private data class UsuarioOnline(val id: String, val nome: String)
     private var usuariosOnline: List<UsuarioOnline> = emptyList()
@@ -126,6 +144,7 @@ class MainActivity : android.app.Activity() {
         tvWifiLogin = findViewById(R.id.tvWifiLogin)
         tvWifiPrincipal = findViewById(R.id.tvWifiPrincipal)
         tvVersao = findViewById(R.id.tvVersao)
+        tvAjudaSegundoPlano = findViewById(R.id.tvAjudaSegundoPlano)
         tvChamada = findViewById(R.id.tvChamada)
         layoutFavoritos = findViewById(R.id.layoutFavoritos)
         layoutUsuarios = findViewById(R.id.layoutUsuarios)
@@ -138,6 +157,9 @@ class MainActivity : android.app.Activity() {
         btnAceitar.setOnClickListener { aceitarChamada() }
         btnRecusar.setOnClickListener { recusarChamada() }
         btnEncerrar.setOnClickListener { encerrarChamadaLocal() }
+        tvWifiLogin.setOnClickListener { orientarNomeWifi() }
+        tvWifiPrincipal.setOnClickListener { orientarNomeWifi() }
+        tvAjudaSegundoPlano.setOnClickListener { configurarChamadasSegundoPlano() }
         findViewById<LinearLayout>(R.id.atalhoContatos).setOnClickListener {
             areaContatos.visibility = if (areaContatos.visibility == android.view.View.VISIBLE) {
                 android.view.View.GONE
@@ -170,11 +192,20 @@ class MainActivity : android.app.Activity() {
                 else -> true
             }
         }
+        criarCanalChamadas()
+        processarAcaoNotificacao(intent)
+        solicitarPermissaoNotificacoes()
     }
 
     override fun onResume() {
         super.onResume()
+        activityVisivel = true
         if (::tvWifiLogin.isInitialized) atualizarNomeWifiInterface()
+    }
+
+    override fun onPause() {
+        activityVisivel = false
+        super.onPause()
     }
 
     private fun conectar() {
@@ -188,10 +219,13 @@ class MainActivity : android.app.Activity() {
             requestPermissions(arrayOf(Manifest.permission.RECORD_AUDIO), PEDIDO_MICROFONE)
             return
         }
-        if (!solicitouPermissaoNomeWifi && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (!solicitouPermissaoNomeWifi && !temPermissaoNomeWifi()) {
             solicitouPermissaoNomeWifi = true
-            status("Para mostrar o nome do Wi-Fi, permita a localização. O app usa essa permissão apenas para ler o nome da rede.")
-            requestPermissions(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), PEDIDO_LOCALIZACAO_WIFI)
+            status("Permita Localização durante o uso para identificar o nome do Wi-Fi. Isso não impede o funcionamento se você preferir não permitir.")
+            requestPermissions(
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
+                PEDIDO_LOCALIZACAO_WIFI,
+            )
             return
         }
 
@@ -231,6 +265,7 @@ class MainActivity : android.app.Activity() {
                     tvWifiLogin.text = nomeWifi
                     tvWifiPrincipal.text = nomeWifi
                     mostrarTelaPrincipal()
+                    iniciarServicoPresenca()
                     status("Conectado. Escolha uma pessoa para chamar.")
                     renderizarUsuarios()
                 }
@@ -256,17 +291,23 @@ class MainActivity : android.app.Activity() {
 
     @Suppress("DEPRECATION")
     private fun obterNomeWifi(rede: Network? = null): String {
-        if (checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return "Wi-Fi conectado: permita o acesso à localização para mostrar o nome da rede."
+        if (!temPermissaoNomeWifi() || !localizacaoAtiva()) {
+            return "Wi-Fi conectado: nome indisponível"
         }
         return try {
             val gerente = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-            val infoDaRede = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && rede != null) {
-                gerente.getNetworkCapabilities(rede)?.transportInfo as? WifiInfo
+            val redesWifi = (listOfNotNull(rede, gerente.activeNetwork) + gerente.allNetworks).distinct()
+            val infoDaRede = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                redesWifi.firstNotNullOfOrNull { candidata ->
+                    val capacidades = gerente.getNetworkCapabilities(candidata)
+                    if (capacidades?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true) {
+                        capacidades.transportInfo as? WifiInfo
+                    } else null
+                }
             } else null
             val wifiInfo = infoDaRede
                 ?: (applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager).connectionInfo
-            val nome = wifiInfo?.ssid?.trim('"')
+            val nome = wifiInfo?.ssid?.trim()?.removeSurrounding("\"")?.trim()
             if (nome.isNullOrBlank() || nome == WifiManager.UNKNOWN_SSID || nome == "<unknown ssid>") {
                 "Wi-Fi conectado: nome indisponível"
             } else {
@@ -277,10 +318,187 @@ class MainActivity : android.app.Activity() {
         }
     }
 
+    private fun temPermissaoNomeWifi(): Boolean =
+        checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+
+    @Suppress("DEPRECATION")
+    private fun localizacaoAtiva(): Boolean {
+        val gerente = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        return try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) gerente.isLocationEnabled
+            else gerente.isProviderEnabled(LocationManager.NETWORK_PROVIDER) ||
+                gerente.isProviderEnabled(LocationManager.GPS_PROVIDER)
+        } catch (_: Exception) {
+            true
+        }
+    }
+
+    private fun orientarNomeWifi() {
+        if (!temPermissaoNomeWifi()) {
+            solicitouPermissaoNomeWifi = true
+            requestPermissions(
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
+                PEDIDO_LOCALIZACAO_WIFI,
+            )
+        } else if (!localizacaoAtiva()) {
+            startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+        } else {
+            aviso("O nome da rede não foi fornecido pelo Android neste aparelho. O VORIQ continua funcionando na rede Wi-Fi conectada.")
+        }
+    }
+
     private fun atualizarNomeWifiInterface(rede: Network? = null) {
         val nome = obterNomeWifi(rede)
         tvWifiLogin.text = nome
         if (conectado.get()) tvWifiPrincipal.text = nome
+    }
+
+    private fun iniciarServicoPresenca() {
+        val intent = Intent(this, VoriqPresenceService::class.java)
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(intent)
+            else startService(intent)
+        } catch (_: Exception) {
+            aviso("Não foi possível manter o VORIQ ativo em segundo plano neste aparelho.")
+        }
+    }
+
+    private fun solicitarPermissaoNotificacoes() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), PEDIDO_NOTIFICACOES)
+        }
+    }
+
+    private fun configurarChamadasSegundoPlano() {
+        val notificacoes = getSystemService(NotificationManager::class.java)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && !notificacoes.canUseFullScreenIntent()) {
+            startActivity(
+                Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT)
+                    .setData(Uri.parse("package:$packageName")),
+            )
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), PEDIDO_NOTIFICACOES)
+        } else if (!notificacoes.areNotificationsEnabled()) {
+            startActivity(
+                Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                    .putExtra(Settings.EXTRA_APP_PACKAGE, packageName),
+            )
+        } else {
+            aviso("O VORIQ pode avisar quando houver uma chamada. Mantenha a conexão ativa e não force o fechamento do aplicativo.")
+        }
+    }
+
+    private fun criarCanalChamadas() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val canal = NotificationChannel(
+                CANAL_CHAMADAS,
+                "Chamadas recebidas",
+                NotificationManager.IMPORTANCE_HIGH,
+            ).apply {
+                description = "Alertas de chamadas recebidas pelo VORIQ."
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+            }
+            getSystemService(NotificationManager::class.java).createNotificationChannel(canal)
+        }
+    }
+
+    private fun notificarChamadaRecebida(nome: String) {
+        val abrir = Intent(this, MainActivity::class.java).apply {
+            action = ACAO_ABRIR_CHAMADA
+            flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
+        val abrirPendente = PendingIntent.getActivity(
+            this,
+            ID_NOTIFICACAO_CHAMADA,
+            abrir,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        val recusar = PendingIntent.getActivity(
+            this,
+            ID_NOTIFICACAO_CHAMADA + 1,
+            Intent(this, MainActivity::class.java).apply {
+                action = ACAO_RECUSAR_CHAMADA
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            },
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        val aceitar = PendingIntent.getActivity(
+            this,
+            ID_NOTIFICACAO_CHAMADA + 2,
+            Intent(this, MainActivity::class.java).apply {
+                action = ACAO_ACEITAR_CHAMADA
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            },
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        val notificacao = Notification.Builder(this, CANAL_CHAMADAS)
+            .setSmallIcon(R.drawable.ic_notification)
+            .setContentTitle("Chamada recebida no VORIQ")
+            .setContentText("$nome está chamando")
+            .setCategory(Notification.CATEGORY_CALL)
+            .setVisibility(Notification.VISIBILITY_PUBLIC)
+            .setContentIntent(abrirPendente)
+            .setFullScreenIntent(abrirPendente, true)
+            .setAutoCancel(false)
+            .addAction(0, "Recusar", recusar)
+            .addAction(0, "Aceitar", aceitar)
+            .build()
+        try {
+            getSystemService(NotificationManager::class.java)
+                .notify(ID_NOTIFICACAO_CHAMADA, notificacao)
+        } catch (_: SecurityException) {
+            aviso("Ative as notificações do VORIQ para receber chamadas com o aplicativo oculto.")
+        }
+    }
+
+    private fun cancelarNotificacaoChamada() {
+        getSystemService(NotificationManager::class.java).cancel(ID_NOTIFICACAO_CHAMADA)
+    }
+
+    private fun processarAcaoNotificacao(intent: Intent?) {
+        when (intent?.action) {
+            ACAO_ABRIR_CHAMADA -> prepararTelaSobreBloqueio()
+            ACAO_ACEITAR_CHAMADA -> {
+                prepararTelaSobreBloqueio()
+                aceitarChamada()
+            }
+            ACAO_RECUSAR_CHAMADA -> {
+                recusarChamada()
+                limparTelaSobreBloqueio()
+            }
+        }
+    }
+
+    private fun prepararTelaSobreBloqueio() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(true)
+            setTurnScreenOn(true)
+        } else {
+            @Suppress("DEPRECATION")
+            window.addFlags(android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                android.view.WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
+        }
+    }
+
+    private fun limparTelaSobreBloqueio() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(false)
+            setTurnScreenOn(false)
+        } else {
+            @Suppress("DEPRECATION")
+            window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                android.view.WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        processarAcaoNotificacao(intent)
     }
 
     private fun mostrarTelaPrincipal() {
@@ -399,6 +617,7 @@ class MainActivity : android.app.Activity() {
                 recebendoConvite = true
                 chamadaPendente.set(true)
                 tocarBip()
+                if (!activityVisivel) notificarChamadaRecebida(nomeContato ?: "Alguém")
                 runOnUiThread {
                     tvChamada.text = "${nomeContato ?: "Alguém"} está chamando. Aceita?"
                     btnAceitar.visibility = android.view.View.VISIBLE
@@ -426,6 +645,7 @@ class MainActivity : android.app.Activity() {
                 }
             }
             "chamada_aceita" -> {
+                cancelarNotificacaoChamada()
                 chamadaId = mensagem.optString("chamada_id")
                 nomeContato = mensagem.optString("nome", destinoNome ?: "contato")
                 chamadaPendente.set(false)
@@ -439,6 +659,7 @@ class MainActivity : android.app.Activity() {
                     return
                 }
                 runOnUiThread {
+                    limparTelaSobreBloqueio()
                     tvChamada.text = "Em chamada com ${nomeContato ?: "contato"}. Segure o botão para falar."
                     btnAceitar.visibility = android.view.View.GONE
                     btnRecusar.visibility = android.view.View.GONE
@@ -449,9 +670,11 @@ class MainActivity : android.app.Activity() {
                 }
             }
             "chamada_encerrada" -> {
+                cancelarNotificacaoChamada()
                 val motivo = mensagem.optString("motivo")
                 limparChamada()
                 runOnUiThread {
+                    limparTelaSobreBloqueio()
                     tvChamada.text = when (motivo) {
                         "sem_resposta" -> "A chamada não foi atendida."
                         "recusada" -> "A chamada foi recusada."
@@ -462,10 +685,12 @@ class MainActivity : android.app.Activity() {
                 }
             }
             "erro" -> {
+                cancelarNotificacaoChamada()
                 chamadaPendente.set(false)
                 chamadaId = null
                 recebendoConvite = false
                 runOnUiThread {
+                    limparTelaSobreBloqueio()
                     tvChamada.text = mensagem.optString("mensagem", "Não foi possível iniciar a chamada.")
                     btnFalar.isEnabled = false
                     btnFalar.text = "SEGURE"
@@ -584,6 +809,8 @@ class MainActivity : android.app.Activity() {
     }
 
     private fun recusarChamada() {
+        cancelarNotificacaoChamada()
+        limparTelaSobreBloqueio()
         val id = chamadaId ?: return
         enviarControle(JSONObject().put("tipo", "recusar").put("chamada_id", id))
         limparChamada()
@@ -592,6 +819,8 @@ class MainActivity : android.app.Activity() {
     }
 
     private fun encerrarChamadaLocal() {
+        cancelarNotificacaoChamada()
+        limparTelaSobreBloqueio()
         val id = chamadaId
         if (id != null) enviarControle(JSONObject().put("tipo", if (recebendoConvite) "recusar" else "encerrar").put("chamada_id", id))
         limparChamada()
@@ -765,6 +994,8 @@ class MainActivity : android.app.Activity() {
     }
 
     private fun desconectar(mensagem: String = "Desconectado") {
+        cancelarNotificacaoChamada()
+        stopService(Intent(this, VoriqPresenceService::class.java))
         conectado.set(false)
         chamadaPendente.set(false)
         chamadaAtiva.set(false)
@@ -825,6 +1056,8 @@ class MainActivity : android.app.Activity() {
         } else if (requestCode == PEDIDO_LOCALIZACAO_WIFI) {
             atualizarNomeWifiInterface()
             conectar()
+        } else if (requestCode == PEDIDO_NOTIFICACOES && grantResults.firstOrNull() != PackageManager.PERMISSION_GRANTED) {
+            aviso("Sem notificações permitidas, o VORIQ pode não conseguir avisar sobre chamadas quando estiver oculto.")
         }
     }
 

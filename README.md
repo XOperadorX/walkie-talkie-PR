@@ -173,6 +173,8 @@ O script salva `docs/guia_do_usuario.pdf` e `output/pdf/VORIQ_Guia_do_Usuario.pd
 
 - **A página não abre no celular:** confirme que o celular e o computador estão no mesmo Wi-Fi, use o endereço exibido pelo servidor e permita Python no Firewall do Windows para redes privadas.
 - **O aplicativo não encontra o servidor:** confira se UDP `5001` está liberado e se o roteador permite comunicação entre aparelhos conectados. Redes de convidados podem impedir isso.
+- **O nome do Wi-Fi aparece indisponível:** toque no nome exibido no aplicativo, permita a localização e, em aparelhos antigos, ligue também o serviço Localização do Android. O login e as chamadas podem funcionar mesmo sem mostrar o SSID.
+- **Não aparece o alerta de chamada com o VORIQ oculto:** permita notificações, conecte-se pelo aplicativo e habilite **Ativar chamadas em segundo plano**. Em Android 14 ou mais novo, permita intents de tela inteira para abrir a tela do convite sobre o bloqueio. Economia de bateria e Forçar parada podem interromper a sessão.
 - **O login falha:** confira o ID e a senha. As contas ficam no `usuarios.json` usado pelo servidor; se `WALKIE_DATA_FILE` estiver configurada, confira o caminho alternativo.
 - **A tela administrativa pede senha repetidamente ou não carrega os dados:** inicie o servidor com `WALKIE_ADMIN_PASSWORD` definida na mesma janela e use usuário `admin` com essa senha.
 - **A página APK diz que o arquivo não existe:** compile o projeto Android e confirme que `android/app/build/outputs/apk/debug/app-debug.apk` foi criado.
@@ -180,4 +182,4 @@ O script salva `docs/guia_do_usuario.pdf` e `output/pdf/VORIQ_Guia_do_Usuario.pd
 
 ## Versão atual
 
-O aplicativo Android está configurado como versão **1.9** (`versionCode 10`), com `compileSdk` e `targetSdk` 35 e versão mínima Android 8.0 (API 26). A tela principal apresenta o botão PTT e atalhos; **Contatos** abre favoritos e pessoas online. Esta versão mantém chamadas privadas entre duas pessoas e descoberta automática do servidor. Grupos, canais e áudio HD das imagens conceituais ainda não estão implementados.
+O aplicativo Android está configurado como versão **1.12** (`versionCode 13`), com `compileSdk` e `targetSdk` 35 e versão mínima Android 8.0 (API 26). A tela principal apresenta o botão PTT e atalhos; **Contatos** abre favoritos e pessoas online. O serviço em primeiro plano mantém a sessão enquanto o app fica oculto, e alertas de chamada oferecem **Aceitar** e **Recusar**. A tela cheia depende da permissão de notificações e, no Android 14+, do acesso de intent de tela inteira. O sistema pode limitar conexões em economia de bateria ou após forçar o fechamento do app. Grupos, canais e áudio HD das imagens conceituais ainda não estão implementados.

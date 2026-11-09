@@ -5,7 +5,7 @@ import textwrap
 ROOT = Path(__file__).resolve().parents[1]
 DESTINATIONS = [ROOT / "docs" / "guia_do_usuario.pdf", ROOT / "output" / "pdf" / "VORIQ_Guia_do_Usuario.pdf"]
 WIDTH, HEIGHT = 595, 842
-VERSION = "1.9"
+VERSION = "1.12"
 
 
 def encoded(text):
@@ -93,8 +93,8 @@ pages = [
         ("note", "Na primeira compilação, o Gradle baixa arquivos pela internet. Não precisa instalar Gradle separadamente."),
         ("heading", "4. Entrar no aplicativo"),
         ("step", "1. A primeira tela mostra a versão do app e o nome do Wi-Fi. Digite ID e senha. Depois do login, o app guarda as credenciais criptografadas no celular."),
-        ("step", "2. O Android pode pedir permissão de localização para revelar o nome do Wi-Fi. O app usa essa permissão somente para ler o nome da rede. Se negar, a conexão automática continua disponível, mas o nome pode ficar indisponível."),
-        ("step", "3. Toque em Entrar. O app procura o servidor automaticamente, sem pedir IP. Depois do login, abre a segunda tela com os contatos."),
+        ("step", "2. O Android pode pedir permissão de Localização para revelar o nome do Wi-Fi. Em aparelhos antigos, ligue também Localização nas configurações do celular. Se o nome estiver indisponível, toque na mensagem do Wi-Fi para ver essa configuração; ainda é possível conectar."),
+        ("step", "3. Toque em Entrar. O app procura o servidor automaticamente, sem pedir IP. Depois do login, abre a tela do comunicador. Toque em Contatos para abrir favoritos e pessoas online."),
     ],
     [
         ("heading", "5. Chamar e conversar"),
@@ -103,7 +103,12 @@ pages = [
         ("step", "3. Os dois celulares tocam dois bipes. A pessoa chamada toca em Aceitar para iniciar a chamada."),
         ("step", "4. Depois do aceite, segure Toque e segure para falar. Solte o botão para parar."),
         ("step", "5. Toque em Encerrar chamada quando terminar. Somente as duas pessoas da chamada ouvem o áudio."),
-        ("note", "Para receber convites, a outra pessoa deve manter o aplicativo aberto e conectado. Este protótipo não mostra notificações quando fechado."),
+        ("note", "Para receber convites, o app precisa continuar conectado ao servidor na mesma rede Wi-Fi."),
+        ("heading", "Receber chamadas com o app oculto"),
+        ("step", "1. Permita as notificações do VORIQ. Deixe o app conectado e use o botão Início para ocultá-lo; não use Forçar parada."),
+        ("step", "2. Na tela 1, toque em Ativar chamadas em segundo plano. No Android 14 ou mais novo, habilite também a opção de intents de tela inteira do VORIQ para permitir a abertura sobre o bloqueio."),
+        ("step", "3. Com o celular desbloqueado, use Aceitar ou Recusar no alerta. Com a tela bloqueada e a permissão habilitada, o Android pode abrir a tela do convite."),
+        ("note", "Economia de bateria, Wi-Fi desconectado ou Forçar parada podem interromper a conexão e os avisos."),
         ("heading", "Se algo nao funcionar"),
         ("body", "Servidor não encontrado: confirme mesmo Wi-Fi, servidor aberto e permissão do Firewall para Python em rede privada. O roteador deve permitir comunicação entre aparelhos; Wi-Fi de convidados pode bloquear."),
         ("body", "Conexão interrompida ao chamar: entre novamente e tente chamar alguém conectado. O terminal informa se o convite foi enviado ou se a pessoa estava offline/ocupada."),
@@ -115,7 +120,7 @@ pages = [
         ("body", "As credenciais guardadas no celular são criptografadas. Os favoritos guardam os IDs no aparelho. O servidor armazena hashes de senha em usuarios.json. A senha e o áudio não são criptografados durante o envio pela rede: use Wi-Fi privado e confiável, e não exponha as portas à internet."),
         ("body", "O computador servidor é necessário. A descoberta funciona somente no mesmo Wi-Fi acessível ao computador; não funciona entre redes diferentes nem pela rede móvel."),
         ("heading", "Identidade VORIQ"),
-        ("body", "Marca VORIQ. Slogan: Sua voz. Sua conexão. Categoria: Comunicador Wi-Fi. A versão 1.9 permite chamadas privadas entre duas pessoas pela rede Wi-Fi local. Os atalhos de grupos e configurações são prévias; esses recursos, canais e áudio HD ainda não estão implementados."),
+        ("body", "Marca VORIQ. Slogan: Sua voz. Sua conexão. Categoria: Comunicador Wi-Fi. A versão 1.12 permite chamadas privadas entre duas pessoas pela rede Wi-Fi local. Os atalhos de grupos e configurações são prévias; esses recursos, canais e áudio HD ainda não estão implementados."),
     ],
 ]
 

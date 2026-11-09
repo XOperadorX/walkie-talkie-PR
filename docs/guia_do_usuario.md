@@ -1,6 +1,6 @@
 # Guia do VORIQ para celular
 
-Este guia acompanha o VORIQ versão **1.9**. Ele ensina a instalar, conectar e fazer uma chamada privada pelo celular. O aplicativo usa o Wi-Fi local e um computador servidor. É um protótipo independente que funciona apenas pela rede Wi-Fi local, com um computador servidor ligado.
+Este guia acompanha o VORIQ versão **1.12**. Ele ensina a instalar, conectar e fazer uma chamada privada pelo celular. O aplicativo usa o Wi-Fi local e um computador servidor. É um protótipo independente que funciona apenas pela rede Wi-Fi local, com um computador servidor ligado.
 
 ## O que você precisa
 
@@ -74,7 +74,7 @@ Na primeira compilação, o Gradle Wrapper baixa Gradle 8.9 pela internet. Não 
 
 1. Confirme que o servidor está ligado e que os celulares usam o mesmo Wi-Fi do computador.
 2. Abra o VORIQ. A **tela 1** mostra o nome do Wi-Fi, a versão instalada e os campos de ID e senha. Na primeira vez, digite seus dados. Depois de entrar com sucesso, o app salva ID e senha criptografados no celular.
-3. O Android pode pedir permissão de localização para mostrar o nome do Wi-Fi. O aplicativo usa essa permissão somente para ler o nome da rede; não calcula nem registra a localização do aparelho. Se não permitir, ainda pode conectar, mas talvez o nome da rede não apareça.
+3. O Android pode pedir permissão de localização para mostrar o nome do Wi-Fi. O aplicativo usa essa permissão somente para ler o nome da rede; não calcula nem registra a localização do aparelho. Em aparelhos mais antigos, também pode ser necessário ligar **Localização** nas configurações do celular. Se o nome estiver indisponível, toque na mensagem do Wi-Fi para ver essa configuração; ainda é possível conectar sem mostrar o nome.
 4. Toque em **Entrar**. O aplicativo procura o servidor automaticamente, sem pedir IP. Quando a conexão for aceita, abre a **tela 2**.
 5. A **tela 2** mostra o botão para falar e os atalhos. Toque em **Contatos** para abrir favoritos e pessoas online. Toque na estrela ao lado de um ID para adicioná-lo ou removê-lo dos favoritos. A lista de favoritos fica salva no celular, mesmo quando a pessoa está offline.
 6. Toque em **Chamar** ao lado da pessoa desejada. Os dois celulares tocam dois bipes. O celular chamado mostra o pedido; a outra pessoa deve tocar em **Aceitar**. Mantenha o app dela aberto para receber o convite.
@@ -83,6 +83,13 @@ Na primeira compilação, o Gradle Wrapper baixa Gradle 8.9 pela internet. Não 
 9. Toque em **Desconectar e voltar** para encerrar a conexão e retornar à tela 1.
 
 Esse modo de falar é chamado Push-to-Talk (PTT): pressione e segure para falar, solte para parar. O convite e o aceite precisam acontecer antes do áudio.
+
+## Receber chamadas com o aplicativo oculto
+
+1. Ao entrar, permita as notificações do VORIQ. A notificação persistente informa que o app está conectado e pronto para receber chamadas.
+2. Na tela 1, toque em **Ativar chamadas em segundo plano** para revisar as permissões do Android. Em Android 14 ou mais novo, habilite também a opção de intents de tela inteira do VORIQ para permitir que a chamada abra a tela sobre o bloqueio.
+3. Quando o celular estiver desbloqueado, a chamada aparece como notificação com as ações **Aceitar** e **Recusar**. Com a tela bloqueada e a permissão de tela inteira habilitada, o Android pode abrir o VORIQ para mostrar o convite.
+4. Deixe o app conectado e use o botão Início para ocultá-lo. Não use **Forçar parada**. O modo de economia de bateria do fabricante ou a perda do Wi-Fi pode interromper a conexão.
 
 ## Se algo não funcionar
 
@@ -93,6 +100,8 @@ Esse modo de falar é chamado Push-to-Talk (PTT): pressione e segure para falar,
 - **Botão para falar continua cinza:** durante o convite, o app mostra “Aguarde o aceite para falar”. O botão só fica ativo depois que a outra pessoa aceita; isso evita transmitir áudio antes da chamada começar.
 - **Não ouviu o bip ou não recebeu o convite:** mantenha o aplicativo aberto em primeiro plano e conectado. O protótipo ainda não mostra notificações quando o app está fechado.
 - **Nome do Wi-Fi não aparece:** permita a leitura da localização para que o Android revele o nome da rede. O aplicativo usa essa permissão somente para mostrar o nome do Wi-Fi; sem ela, a conexão automática ainda pode funcionar.
+- **O nome continua indisponível em um celular antigo:** toque na mensagem do Wi-Fi e confirme que a permissão de localização foi aceita e que **Localização** está ligada nas configurações rápidas do celular.
+- **Não recebe chamada com o app oculto:** permita as notificações, deixe o VORIQ conectado, toque em **Ativar chamadas em segundo plano** e habilite a tela inteira quando o Android oferecer essa opção. Confira também se a economia de bateria não suspendeu o app.
 - **Não consegue falar:** habilite o microfone em **Configurações > Aplicativos > VORIQ > Permissões**. Encerre a chamada e conecte novamente.
 - **ID/senha não foram preenchidos:** o salvamento ocorre depois de um login bem-sucedido. Se os dados do app forem apagados ou ele for reinstalado, digite-os outra vez.
 - **Não consegue instalar:** confirme que o APK foi gerado em `android/app/build/outputs/apk/debug/app-debug.apk` e permita instalar apps desta fonte.
@@ -105,7 +114,7 @@ O servidor e os celulares precisam estar ligados e na mesma rede local acessíve
 
 ## Identidade VORIQ
 
-Marca VORIQ; slogan “Sua voz. Sua conexão.”; categoria Comunicador Wi-Fi. A versão 1.9 mantém chamadas privadas entre duas pessoas. Os atalhos de grupos e configurações são prévias; esses recursos ainda não estão disponíveis. Grupos, canais e áudio HD mostrados em artes conceituais não fazem parte desta versão.
+Marca VORIQ; slogan “Sua voz. Sua conexão.”; categoria Comunicador Wi-Fi. A versão 1.12 mantém chamadas privadas entre duas pessoas. Os atalhos de grupos e configurações são prévias; esses recursos ainda não estão disponíveis. Grupos, canais e áudio HD mostrados em artes conceituais não fazem parte desta versão.
 
 ## Atualização deste guia
 

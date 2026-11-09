@@ -91,11 +91,21 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="O nome da rede Wi-Fi é exibido quando o Android permite a leitura das informações da rede."
+                android:text="Se o nome do Wi-Fi não aparecer, toque nele para ver como liberar a identificação da rede."
                 android:textColor="#A8BDD4"
                 android:textSize="12sp"
                 android:gravity="center"
                 android:padding="8dp" />
+
+            <TextView
+                android:id="@+id/tvAutor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Autor: Moises20XX\nEmpresa: MMQuaseTudo"
+                android:textColor="#A8BDD4"
+                android:textSize="12sp"
+                android:gravity="center"
+                android:paddingTop="6dp" />
 
             <TextView
                 android:id="@+id/tvVersao"
@@ -106,6 +116,19 @@
                 android:textSize="12sp"
                 android:gravity="center"
                 android:padding="6dp" />
+
+            <TextView
+                android:id="@+id/tvAjudaSegundoPlano"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Ativar chamadas em segundo plano"
+                android:textColor="#18D8F4"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:gravity="center"
+                android:padding="10dp"
+                android:clickable="true"
+                android:focusable="true" />
         </LinearLayout>
 
         <LinearLayout
