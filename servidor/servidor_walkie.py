@@ -2,6 +2,7 @@
 """Walkie-talkie server for a trusted local Wi-Fi network."""
 from __future__ import annotations
 
+import base64
 import hashlib
 import hmac
 import json
@@ -23,6 +24,7 @@ HOST = "0.0.0.0"
 PORTA_SERVIDOR = int(os.environ.get("WALKIE_AUDIO_PORT", "5000"))
 PORTA_WEB = int(os.environ.get("WALKIE_WEB_PORT", "8080"))
 PORTA_DESCOBERTA = int(os.environ.get("WALKIE_DISCOVERY_PORT", "5001"))
+SENHA_ADMIN = os.environ.get("WALKIE_ADMIN_PASSWORD", "")
 TAMANHO_MAXIMO_AUDIO = 8192
 TAMANHO_MAXIMO_CONTROLE = 16384
 ITERACOES_HASH = 310_000
@@ -373,10 +375,17 @@ class WebHandler(BaseHTTPRequestHandler):
 
     def do_GET(self) -> None:
         caminho = self.path.split("?", 1)[0]
-        if caminho == "/favicon.ico":
+        if caminho == "/api/admin/usuarios":
+            if not self.autorizar_admin():
+                return
+            with lock:
+                lista = [{"id": uid, "nome": dados.get("nome", "")} for uid, dados in usuarios.items()]
+            lista.sort(key=lambda usuario: usuario["nome"].casefold())
+            self.responder_json(200, {"usuarios": lista})
+        elif caminho == "/favicon.ico":
             self.send_response(204)
             self.end_headers()
-        elif caminho in ("/", "/index.html", "/inicio.html", "/cadastro.html", "/apk.html"):
+        elif caminho in ("/", "/index.html", "/inicio.html", "/cadastro.html", "/apk.html", "/adm_cadastro.html"):
             nome_pagina = "index.html" if caminho in ("/", "/index.html") else caminho[1:]
             conteudo = (WEB_DIR / nome_pagina).read_bytes()
             self.send_response(200)
@@ -400,6 +409,18 @@ class WebHandler(BaseHTTPRequestHandler):
             self.responder_html(404, "Página não encontrada", "")
 
     def do_POST(self) -> None:
+        if self.path == "/api/admin/usuarios":
+            if not self.autorizar_admin():
+                return
+            try:
+                dados = self.ler_json()
+                uid = criar_usuario(str(dados.get("nome", "")), str(dados.get("senha", "")))
+                self.responder_json(201, {"id": uid, "nome": usuarios[uid]["nome"]})
+            except (ValueError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+                self.responder_json(400, {"erro": str(exc) or "Dados inválidos."})
+            except OSError:
+                self.responder_json(500, {"erro": "Não foi possível salvar os usuários."})
+            return
         if self.path != "/cadastrar":
             self.responder_html(404, "Página não encontrada", "")
             return
@@ -416,6 +437,92 @@ class WebHandler(BaseHTTPRequestHandler):
             self.responder_html(400, "Não foi possível cadastrar", str(exc))
         except OSError:
             self.responder_html(500, "Erro ao salvar cadastro", "Confira as permissões da pasta do servidor.")
+
+    def do_PUT(self) -> None:
+        prefixo = "/api/admin/usuarios/"
+        if not self.path.startswith(prefixo):
+            self.responder_json(404, {"erro": "Rota não encontrada."})
+            return
+        if not self.autorizar_admin():
+            return
+        from urllib.parse import unquote
+        uid = unquote(self.path[len(prefixo):])
+        try:
+            dados = self.ler_json()
+            nome = str(dados.get("nome", "")).strip()
+            if not 2 <= len(nome) <= 50:
+                raise ValueError("O nome deve ter entre 2 e 50 caracteres.")
+            senha = str(dados.get("senha", ""))
+            with lock:
+                usuario = usuarios.get(uid)
+                if usuario is None:
+                    self.responder_json(404, {"erro": "Cadastro não encontrado."})
+                    return
+                atualizado = {**usuario, "nome": nome}
+                if senha:
+                    if not 8 <= len(senha) <= 128:
+                        raise ValueError("A senha deve ter entre 8 e 128 caracteres.")
+                    salt = secrets.token_bytes(16)
+                    atualizado["salt"] = salt.hex()
+                    atualizado["senha_hash"] = hashlib.pbkdf2_hmac("sha256", senha.encode("utf-8"), salt, ITERACOES_HASH).hex()
+                usuarios[uid] = atualizado
+                salvar_usuarios()
+            self.responder_json(200, {"id": uid, "nome": nome})
+        except (ValueError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+            self.responder_json(400, {"erro": str(exc) or "Dados inválidos."})
+        except OSError:
+            self.responder_json(500, {"erro": "Não foi possível salvar os usuários."})
+
+    def do_DELETE(self) -> None:
+        prefixo = "/api/admin/usuarios/"
+        if not self.path.startswith(prefixo):
+            self.responder_json(404, {"erro": "Rota não encontrada."})
+            return
+        if not self.autorizar_admin():
+            return
+        from urllib.parse import unquote
+        uid = unquote(self.path[len(prefixo):])
+        try:
+            with lock:
+                if uid not in usuarios:
+                    self.responder_json(404, {"erro": "Cadastro não encontrado."})
+                    return
+                removido = usuarios.pop(uid)
+                salvar_usuarios()
+            self.responder_json(200, {"id": uid, "nome": removido.get("nome", "")})
+        except OSError:
+            self.responder_json(500, {"erro": "Não foi possível salvar os usuários."})
+
+    def autorizar_admin(self) -> bool:
+        if not SENHA_ADMIN:
+            self.responder_json(503, {"erro": "Configure WALKIE_ADMIN_PASSWORD antes de usar a administração."})
+            return False
+        esperado = "Basic " + base64.b64encode(("admin:" + SENHA_ADMIN).encode("utf-8")).decode("ascii")
+        if not hmac.compare_digest(self.headers.get("Authorization", ""), esperado):
+            self.send_response(401)
+            self.send_header("WWW-Authenticate", 'Basic realm="Nextel Local - Administração", charset="UTF-8"')
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return False
+        return True
+
+    def ler_json(self) -> dict:
+        tamanho = int(self.headers.get("Content-Length", "0"))
+        if not 0 < tamanho <= 4096:
+            raise ValueError("Formulário inválido.")
+        dados = json.loads(self.rfile.read(tamanho).decode("utf-8"))
+        if not isinstance(dados, dict):
+            raise ValueError("Dados inválidos.")
+        return dados
+
+    def responder_json(self, status: int, dados: dict) -> None:
+        conteudo = json.dumps(dados, ensure_ascii=False).encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json; charset=utf-8")
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("Content-Length", str(len(conteudo)))
+        self.end_headers()
+        self.wfile.write(conteudo)
 
     def responder_html(self, status: int, titulo: str, texto: str, uid: str = "") -> None:
         import html

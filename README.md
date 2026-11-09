@@ -24,8 +24,11 @@ O Android pode solicitar permissão de localização para revelar o nome da rede
 2. Execute `iniciar_servidor.bat`, ou abra o PowerShell na pasta do projeto e execute:
 
 ```powershell
+$env:WALKIE_ADMIN_PASSWORD = "escolha-uma-senha-forte"
 python servidor/servidor_walkie.py
 ```
+
+Defina essa senha antes de iniciar o servidor para usar `adm_cadastro.html`. O acesso administrativo usa o usuário `admin` e a senha definida acima. Se não precisar da tela administrativa, remova a linha `$env:WALKIE_ADMIN_PASSWORD`.
 
 3. Se o Firewall do Windows perguntar, permita Python em **redes privadas**.
 4. Para abrir o cadastro, use no navegador do celular ou computador o endereço HTTP impresso no terminal, por exemplo `http://192.168.0.10:8080`. Esse IP serve para a página de cadastro/download; **não precisa digitá-lo no aplicativo**.
@@ -33,9 +36,9 @@ python servidor/servidor_walkie.py
 
 O servidor usa TCP `5000` para chamadas, UDP `5001` para descoberta automática e TCP `8080` para cadastro/download. Todos os aparelhos devem poder se comunicar entre si no Wi-Fi. Redes de convidados ou isolamento de clientes podem bloquear essa comunicação.
 
-As portas podem ser personalizadas com `WALKIE_WEB_PORT`, `WALKIE_AUDIO_PORT` e `WALKIE_DISCOVERY_PORT`.
+As portas podem ser personalizadas com `WALKIE_WEB_PORT`, `WALKIE_AUDIO_PORT` e `WALKIE_DISCOVERY_PORT`. Para habilitar a administração de cadastros, configure `WALKIE_ADMIN_PASSWORD` antes de iniciar o servidor. O usuário do acesso é `admin`; o navegador solicitará usuário e senha ao abrir `adm_cadastro.html`. Sem essa variável, as operações administrativas ficam desabilitadas.
 
-O site é dividido em `web/inicio.html`, `web/cadastro.html` e `web/apk.html`, todas com o mesmo menu. `web/index.html` continua disponível como página inicial para manter o endereço `/` e o caminho `/index.html` funcionando.
+O site inclui `web/inicio.html`, `web/cadastro.html`, `web/apk.html` e `web/adm_cadastro.html`, todas com o mesmo menu. `web/index.html` continua disponível como página inicial para manter o endereço `/` e o caminho `/index.html` funcionando. Na administração é possível adicionar, editar nome/senha e excluir usuários; o ID permanece o mesmo ao editar e as senhas são armazenadas somente como hash.
 
 ## Criar e instalar o app Android pelo terminal
 

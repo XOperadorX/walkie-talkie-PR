@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#102a43">
+  <title>Nextel Local · Administração de cadastros</title>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:#edf3f8;color:#18324a;font:16px system-ui,Arial,sans-serif}.wrap{width:min(900px,100%);margin:auto;padding:24px 18px 48px}.hero{background:#102a43;color:#fff;padding:30px;border-radius:20px}.hero h1{margin:0 0 8px;font-size:30px}.hero p{margin:0;line-height:1.5}.menu{display:flex;gap:12px;margin:16px 0}.menu a,.button{display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:10px;padding:12px 18px;background:#087e8b;color:white;font-weight:700;text-decoration:none;cursor:pointer}.menu a{flex:1}.card{background:#fff;padding:24px;margin-top:16px;border-radius:16px;box-shadow:0 5px 18px #17324a12}.card h2{margin-top:0}.muted{color:#52687b;font-size:.94rem;line-height:1.55}label{display:block;font-weight:650;margin-top:14px}input{width:100%;padding:13px;margin-top:6px;border:1px solid #bdcbd8;border-radius:9px;font-size:16px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.actions{display:flex;gap:8px;flex-wrap:wrap}.actions .button{margin-top:16px}.danger{background:#b83232}.secondary{background:#52687b}.status{min-height:1.5em;margin:12px 0;color:#18324a}.table-wrap{overflow:auto}table{width:100%;border-collapse:collapse;margin-top:12px}th,td{text-align:left;padding:12px 8px;border-bottom:1px solid #dce5ed}td:first-child{overflow-wrap:anywhere}.row-actions{white-space:nowrap}.row-actions button{margin:2px;padding:8px 10px}.empty{text-align:center;padding:22px;color:#52687b}@media(max-width:600px){.hero{padding:23px}.card{padding:19px}.menu{gap:7px;flex-wrap:wrap}.menu a{padding:10px 6px;font-size:.88rem}.form-grid{grid-template-columns:1fr}th,td{padding:9px 5px;font-size:.9rem}}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="hero"><h1>📡 Nextel Local</h1><p>Gerencie os cadastros usados para entrar no aplicativo.</p></header>
+    <nav class="menu" aria-label="Menu principal">
+      <a href="inicio.html">Início</a><a href="cadastro.html">Criar acesso</a><a href="apk.html">APK</a><a href="adm_cadastro.html" aria-current="page">adm_cadastro</a>
+    </nav>
+    <section class="card">
+      <h2>Novo cadastro</h2>
+      <p class="muted">A senha precisa ter de 8 a 128 caracteres. Senhas existentes não são exibidas.</p>
+      <form id="form-novo">
+        <div class="form-grid"><div><label for="novo-nome">Nome</label><input id="novo-nome" name="nome" minlength="2" maxlength="50" required></div><div><label for="nova-senha">Senha</label><input id="nova-senha" name="senha" type="password" minlength="8" maxlength="128" required autocomplete="new-password"></div></div>
+        <button class="button" type="submit">Adicionar cadastro</button>
+      </form>
+      <p id="status" class="status" role="status" aria-live="polite"></p>
+    </section>
+    <section class="card">
+      <h2>Cadastros existentes</h2>
+      <p class="muted">Editar o nome mantém o mesmo ID. Para trocar a senha, informe uma nova; deixe o campo em branco para mantê-la.</p>
+      <div class="table-wrap"><table><thead><tr><th>ID</th><th>Nome</th><th>Ações</th></tr></thead><tbody id="lista"></tbody></table></div>
+    </section>
+  </main>
+  <script>
+    const endpoint='/api/admin/usuarios';
+    const lista=document.querySelector('#lista');
+    const status=document.querySelector('#status');
+    async function requisicao(url=endpoint,opcoes={}){
+      const resposta=await fetch(url,{cache:'no-store',...opcoes,headers:{'Content-Type':'application/json',...(opcoes.headers||{})}});
+      if(resposta.status===401) throw new Error('Acesso administrativo não autorizado. Confira a senha configurada no servidor.');
+      const dados=await resposta.json().catch(()=>({}));
+      if(!resposta.ok) throw new Error(dados.erro||'Não foi possível concluir a operação.');
+      return dados;
+    }
+    function celula(texto){const td=document.createElement('td');td.textContent=texto;return td;}
+    async function carregar(){
+      try{
+        const dados=await requisicao();lista.replaceChildren();
+        for(const usuario of dados.usuarios){
+          const linha=document.createElement('tr');linha.append(celula(usuario.id));
+          const nome=document.createElement('td');const campo=document.createElement('input');campo.value=usuario.nome;campo.maxLength=50;campo.setAttribute('aria-label','Nome de '+usuario.id);nome.append(campo);linha.append(nome);
+          const acoes=celula('');acoes.className='row-actions';
+          const senha=document.createElement('input');senha.type='password';senha.placeholder='Nova senha (opcional)';senha.minLength=8;senha.maxLength=128;senha.autocomplete='new-password';senha.setAttribute('aria-label','Nova senha para '+usuario.id);acoes.append(senha);
+          const salvar=document.createElement('button');salvar.className='button';salvar.textContent='Salvar';salvar.addEventListener('click',async()=>{try{await requisicao(endpoint+'/'+encodeURIComponent(usuario.id),{method:'PUT',body:JSON.stringify({nome:campo.value,senha:senha.value})});senha.value='';status.textContent='Cadastro atualizado.';await carregar();}catch(e){status.textContent=e.message;}});acoes.append(salvar);
+          const excluir=document.createElement('button');excluir.className='button danger';excluir.textContent='Excluir';excluir.addEventListener('click',async()=>{if(!confirm('Excluir o cadastro '+usuario.id+'?'))return;try{await requisicao(endpoint+'/'+encodeURIComponent(usuario.id),{method:'DELETE'});status.textContent='Cadastro excluído.';await carregar();}catch(e){status.textContent=e.message;}});acoes.append(excluir);linha.append(acoes);lista.append(linha);
+        }
+        if(!dados.usuarios.length){const linha=document.createElement('tr');const vazio=celula('Nenhum cadastro encontrado.');vazio.colSpan=3;vazio.className='empty';linha.append(vazio);lista.append(linha);}
+      }catch(e){status.textContent=e.message;}
+    }
+    document.querySelector('#form-novo').addEventListener('submit',async evento=>{evento.preventDefault();const form=new FormData(evento.currentTarget);try{const criado=await requisicao(endpoint,{method:'POST',body:JSON.stringify({nome:form.get('nome'),senha:form.get('senha')})});status.textContent='Cadastro criado. ID: '+criado.id;evento.currentTarget.reset();await carregar();}catch(e){status.textContent=e.message;}});
+    carregar();
+  </script>
+</body>
+</html>
